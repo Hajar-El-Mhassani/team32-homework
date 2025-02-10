@@ -2,7 +2,7 @@
 const yearOfBirth=1995;
 const yearOfFuture=2027;
 const age=yearOfFuture-yearOfBirth;
-console.log("You will be "+age+" years old in "+yearOfFuture);  
+console.log(`You will be ${age} years old in ${yearOfFuture}`);  
 
 
 
@@ -11,7 +11,7 @@ console.log("You will be "+age+" years old in "+yearOfFuture);
 const dogYearOfBirth=2025;
 const dogYearOfFuture=2045;
 const dogAge=dogYearOfFuture-dogYearOfBirth;
-let shouldShowResultInDogYears=true;
+const shouldShowResultInDogYears=true;
 if(shouldShowResultInDogYears){
 console.log(`Your dog will be ${dogAge*7} dog years old in ${dogYearOfFuture}`);
 }
