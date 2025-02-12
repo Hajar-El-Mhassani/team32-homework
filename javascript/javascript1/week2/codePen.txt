@@ -1,1 +1,5 @@
+////event
 https://codepen.io/hackyourfuture-dk/pen/jJWwbN
+
+//Add student to the class
+https://codepen.io/hackyourfuture-dk/pen/PLPmOB
