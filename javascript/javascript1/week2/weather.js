@@ -20,4 +20,5 @@ const checkWeatherTemperature = (temperature) => {
     }
 }
 
-console.log(checkWeatherTemperature(1));
+const checkWeather= checkWeatherTemperature(30);
+console.log(checkWeather);
