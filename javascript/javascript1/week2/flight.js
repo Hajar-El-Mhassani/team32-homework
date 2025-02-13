@@ -23,10 +23,6 @@ else if (!lastName){
 else if(userFormalName){
     return 'Lord ' + firstName + ' ' + lastName;
 }
-else if(!userFormalName){
-    return 'Lady ' + firstName + ' ' + lastName;
-}
-
 else{
 return firstName + ' ' + lastName;
 }
