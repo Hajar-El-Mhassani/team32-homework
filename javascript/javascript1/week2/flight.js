@@ -11,7 +11,16 @@
 const getFullName=(firstName,lastName, userFormalName)=>{
 
     
-  return userFormalName? 'Lord '+firstName+' '+lastName : firstName+' '+lastName;
+  if(userFormalName){
+    return 'Lord ' + firstName + ' ' + lastName;
+}
+if(firstName===''){
+    return 'Please enter your first name';
+}
+if(lastName===''){
+    return 'Please enter your last name';
+}
+return firstName + ' ' + lastName;
   
 }
 //calling the function with two different names and userFormalName as true and false
