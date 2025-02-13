@@ -10,23 +10,34 @@
 //created a function to get the full name of a person
 const getFullName=(firstName,lastName, userFormalName)=>{
 
-    
-  if(userFormalName){
+  if(!firstName && !lastName){
+    return 'Please enter your first and last name';
+}
+else if(!firstName){
+    return 'The first name is required';
+}
+else if (!lastName){
+    return 'The last name is required';
+}
+
+else if(userFormalName){
     return 'Lord ' + firstName + ' ' + lastName;
 }
-if(firstName===''){
-    return 'Please enter your first name';
+else if(!userFormalName){
+    return 'Lady ' + firstName + ' ' + lastName;
 }
-if(lastName===''){
-    return 'Please enter your last name';
-}
+
+else{
 return firstName + ' ' + lastName;
+}
+
   
 }
 //calling the function with two different names and userFormalName as true and false
 const fullName1=getFullName('Hajar','El Mhassani',true);
 const fullNam2=getFullName('Yasmin','Atik',false);
-
+const fullNam4=getFullName('','');//Please enter your first and last name
+const fullNam5=getFullName('Yasmin','');//The last name is required
 //calling functowwith no userFormalName to see the default value
 const fullNam3=getFullName('Ali','Atik');
 //printing the results
