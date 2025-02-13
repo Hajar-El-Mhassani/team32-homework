@@ -39,4 +39,21 @@ console.log(fullNam2);
  * or we can add a title parameter to the function to specify the title of the user 
  * and add a condition to check if the user is a woman or not and add the title to the name
  * or we can use userFormalName as a title  string to add a condition to check if the user is a woman or not 
- */
+const getFullName=(firstName, lastName, userFormalName) =>{
+    if(userFormalName==='male'){
+        return 'Lord ' + firstName + ' ' + lastName;
+    }
+    else if(userFormalName==='female'){
+        return 'Lady ' + firstName + ' ' + lastName;
+    }
+    else if(!firstName){
+        return 'Please enter your first name';
+    }
+    else if (!lastName){
+        return 'Please enter your last name';
+    }
+    else{
+    return firstName + ' ' + lastName;
+}
+}
+*/
