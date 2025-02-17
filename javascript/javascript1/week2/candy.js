@@ -17,7 +17,7 @@
         totalPrice = weight*0.03;
     }
     else{
-        console.log('Invalid candy type');
+        return 'Invalid candy type';
     }
     boughtCandyPrices.push(totalPrice);
    return '[ '+candyType+' '+weight+'g '+totalPrice+' ]';

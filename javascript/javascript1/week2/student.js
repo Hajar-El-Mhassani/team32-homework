@@ -1,7 +1,7 @@
 const class07Students = [];
 function addStudentToClass(studentName) {
   // You write code here
-  //
+  studentName= studentName.trim();
  if(studentName ===''){
     return 'You cannot add an empty string to a class';
   }
@@ -27,7 +27,7 @@ function getNumberOfStudents() {
 
 
 
-console.log(addStudentToClass(''));
+console.log(addStudentToClass(' Ali '));
 console.log(addStudentToClass('Queen'));
 console.log(addStudentToClass('Queen'));
 console.log(addStudentToClass('Queen'));

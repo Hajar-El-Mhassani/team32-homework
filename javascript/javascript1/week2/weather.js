@@ -1,6 +1,6 @@
 
 const checkWeatherTemperature = (temperature) => {
-    if (temperature > 25) {
+    if (temperature >= 25) {
         return 'Shorts and t-shirt';
     } else if (temperature > 15) {
         return 'Jeans and t-shirt';
@@ -20,5 +20,5 @@ const checkWeatherTemperature = (temperature) => {
     }
 }
 
-const checkWeather= checkWeatherTemperature(30);
+const checkWeather= checkWeatherTemperature(25);
 console.log(checkWeather);

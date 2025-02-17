@@ -10,6 +10,8 @@
 //created a function to get the full name of a person
 const getFullName=(firstName,lastName, userFormalName)=>{
 
+    userFormalName=userFormalName||false;
+
   if(!firstName && !lastName){
     return 'Please enter your first and last name';
 }
@@ -21,16 +23,16 @@ else if (!lastName){
 }
 
 else if(userFormalName){
-    return 'Lord ' + firstName + ' ' + lastName;
+    return 'Lord ' + firstName.trim() + ' ' + lastName.trim();
 }
 else{
-return firstName + ' ' + lastName;
+return firstName.trim() + ' ' + lastName.trim();
 }
 
   
 }
 //calling the function with two different names and userFormalName as true and false
-const fullName1=getFullName('Hajar','El Mhassani',true);
+const fullName1=getFullName('  Hajar',' El Mhassani', true);
 const fullNam2=getFullName('Yasmin','Atik',false);
 const fullNam4=getFullName('','');//Please enter your first and last name
 const fullNam5=getFullName('Yasmin','');//The last name is required

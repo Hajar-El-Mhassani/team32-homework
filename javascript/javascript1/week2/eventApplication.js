@@ -33,4 +33,4 @@ const getEventWeekday = (event) => {
 
 console.log(getEventWeekday(10));
 console.log(getEventWeekday(0));
-console.log(getEventWeekday(-1));     
+console.log(getEventWeekday(-50));     
