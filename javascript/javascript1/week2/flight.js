@@ -66,3 +66,6 @@ const getFullName=(firstName, lastName, userFormalName) =>{
 }
 }
 */
+
+const sentence = "apple banana apple orange banana apple";
+const  words= sentence.split(" ")
