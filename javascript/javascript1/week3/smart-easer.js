@@ -78,3 +78,17 @@ console.log(thirdNote);
 console.log(fourthNote);
 console.log(fifthNote);
 console.log(sixthNote);
+
+// log out all notes
+
+const logOutNotesFormatted=()=>{
+    let notesFormat=[];
+    for(let i=0; i<notes.length; i++){
+        let note=notes[i];
+            let formatNote=`The note with id: ${note['id']}, has the following note text:${note['content']}`;
+            notesFormat.push(formatNote);
+    }
+    console.log(notesFormat.join('\n'));
+    return notesFormat.join('\n');
+}
+logOutNotesFormatted();
