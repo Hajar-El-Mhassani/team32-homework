@@ -120,7 +120,6 @@ function getReply(command) {
     }
   }
 
-  // 8. "Set a timer for 4 minutes"
   if (cmdLower.startsWith("set a timer for ")) {
     const afterTimer = cmd.substring("set a timer for ".length).trim();
     const parts = afterTimer.split(" ");
@@ -136,7 +135,6 @@ function getReply(command) {
     }
   }
 
-  // 9. Additional command: "Tell me a joke"
   if (cmdLower.indexOf("tell me a joke") !== -1) {
     return "Why did the chicken cross the road? To get to the other side!";
   }
