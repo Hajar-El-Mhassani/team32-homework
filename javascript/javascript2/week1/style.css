@@ -91,9 +91,16 @@ body {
   white-space: normal;
 }
 
-
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 2rem;
+  justify-content: space-around;
+}
 /* Random Button */
-.random {
+.random, .next-btn {
   padding: 10px 20px;
   background: #FEDC3D; 
   color: white;
