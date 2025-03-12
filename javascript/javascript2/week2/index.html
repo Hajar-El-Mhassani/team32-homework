@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Question Manager</title>
+    <link rel="stylesheet" href="style.css"> <!-- Link to External CSS -->
+</head>
+<body>
+
+    <div class="header">Quiz Question Manager</div>
+
+    <div class="container">
+        <h2>Create a Quiz Question</h2>
+        <div id="questions">
+            
+            <form id="quizForm">
+                <label for="question">Question (max 140 chars):</label>
+                <input type="text" id="question" maxlength="140" required />
+        </div>
+    
+        <div id="options">
+            
+            <label >Options:</label>
+            <div class="option">
+                <input type="radio" name="correct" value="0">
+                <input type="text" class="option-input" required>
+            </div>
+            <div class="option">
+                <input type="radio" name="correct" value="1">
+                <input type="text" class="option-input" required>
+            </div>
+            <div class="option">
+                <input type="radio" name="correct" value="2">
+                <input type="text" class="option-input" required>
+            </div>
+            <div class="option">
+                <input type="radio" name="correct" value="3">
+                <input type="text" class="option-input" required>
+            </div>
+        </div>
+    
+        <div class="button-container">
+            <button type="button" class="random" onclick="randomizeOptions()">Randomize Options</button>
+            <button type="submit" class="next-btn">Add Question</button>
+        </div>
+        </form>
+    </div>
+    
+    <div class="container">
+        <h2>Quiz Questions</h2>
+        <input type="text" id="search" placeholder="Search questions..." onkeyup="filterQuestions()">
+        <div id="quizList" class="quiz-list"></div>
+    </div>
+    
+    <footer>© 2025 Quiz Manager</footer>
+<script src="quiz.js"></script> 
+</body>
+</html>
