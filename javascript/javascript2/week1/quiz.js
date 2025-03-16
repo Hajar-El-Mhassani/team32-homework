@@ -20,7 +20,7 @@ const insertQuestion = () => {
 };
 
 const randomBtn = (array) => {
-  return array.sort(() => Math.random() - 0.5);
+  return array.slice().sort(() => Math.random() - 0.5);
 };
 
 const insertButton = () => {
@@ -55,8 +55,10 @@ const insertButton = () => {
     groupBtn.appendChild(btn);
   }
 };
-const random = () => {
+const resetBtn = document.getElementsByClassName("random");
+
+resetBtn[0].addEventListener("click", () => {
   insertButton();
-};
+});
 insertQuestion();
 insertButton();
