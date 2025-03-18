@@ -26,12 +26,6 @@ body {
   width: 100%;
   max-width: 700px;
   height: auto;
-
-  background-image: url("../images/image.jpg");
-
-  background-repeat: no-repeat;
-  background-position: center;
-  margin-bottom: 20px;
 }
 
 .container {
