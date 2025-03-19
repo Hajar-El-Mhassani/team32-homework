@@ -1,38 +1,42 @@
-/* Reset Defaults */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+body {
+  margin: 0; /* Remove default margin */
 }
 
-/* Make Body Use Flexbox for Full Height Layout */
-body {
+.section {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; 
-  font-family: Arial, sans-serif;
-  background-color: #ffffff; /
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh; /* Ensure full height */
+  background-color: #3f3c3c;
+  width: 100%;
+  padding: 10px;
 }
 
-/* Header Styling */
-.header {
-  background-color: #000000; 
-  color: white;
-  text-align: center;
-  padding: 20px;
-  font-size: 24px;
-  font-weight: bold;
+.header-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 150px; /* Adjust based on your needs */
+  background-image: url("../images/image.jpg"); /* Ensure this path is correct */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  max-width: 700px;
   width: 100%;
+
+  color: rgb(29, 29, 29);
+  margin-bottom: 10px;
+  text-align: center;
 }
 
 /* Make the Section Expand to Push Footer Down */
-.section {
-  display: flex;
-  flex: 1; 
-  justify-content: center;
-  align-items: center;
-  padding: 20px;
-}
 
 /* Container*/
 .container {
@@ -45,8 +49,8 @@ body {
   text-align: center;
   background: white;
   padding: 20px;
-  border-radius: 10px;
-  box-shadow:0px 4px 15px rgba(0, 0, 0, 0.3);
+
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
@@ -55,7 +59,7 @@ body {
 .question {
   font-size: 22px;
   font-weight: bold;
-  color: #000000; 
+  color: #000000;
   word-wrap: break-word;
   overflow-wrap: break-word;
   white-space: normal;
@@ -68,7 +72,7 @@ body {
 /* Button Group */
 .btn-group {
   display: flex;
-  flex-direction: column; 
+  flex-direction: column;
   gap: 10px;
   width: 100%;
   margin-bottom: 2rem;
@@ -76,10 +80,10 @@ body {
 
 /* Buttons: Full Width & Wrap Text */
 .btn-group button {
-  width: 100%; 
+  width: 100%;
   padding: 15px;
   border: none;
-  background: #01ABAA;
+  background: #01abaa;
   color: white;
   font-size: 18px;
   cursor: pointer;
@@ -91,11 +95,19 @@ body {
   white-space: normal;
 }
 
-
+.button-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 2rem;
+  justify-content: space-around;
+}
 /* Random Button */
-.random {
+.random,
+.next-btn {
   padding: 10px 20px;
-  background: #FEDC3D; 
+  background: #fedc3d;
   color: white;
   border: none;
   font-size: 16px;
@@ -109,24 +121,28 @@ body {
 }
 
 /* Footer Always Stays at the Bottom */
+/* Footer */
 footer {
-  background: #000000;
-  color: white;
+  background: #fffdfd;
+  color: #000;
   text-align: center;
   padding: 10px;
   font-size: 14px;
+  margin-top: 5px;
+
   width: 100%;
+  max-width: 700px;
 }
 
 /* Media Query for Tablets & Desktops */
 @media (min-width: 768px) {
   .btn-group {
-    flex-direction: row; 
+    flex-direction: row;
     flex-wrap: wrap;
     justify-content: center;
   }
 
   .btn-group button {
-    width: 48%; 
+    width: 48%;
   }
 }

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz Question Manager</title>
+    <link rel="stylesheet" href="./css/createQuiz.css" />
+  </head>
+  <body>
+    <main>
+      <section class="container-create">
+        <div class="header"></div>
+
+        <div class="container">
+          <h2>CREATE A QUIZ</h2>
+
+          <form id="quizForm">
+            
+              <div id="category">
+                <label for="category-select">Choose Category:</label>
+                <select id="category-select" name="categories" required>
+                  <option value="">Select quiz category:</option>
+                </select>
+                <!-- Hidden Input Field for "Other" Option -->
+                <input
+                  type="text"
+                  id="otherCategory"
+                  name="otherCategory"
+                  placeholder="Enter your category"
+                  style="display: none"
+                />
+              </div>
+
+              <div id="questions">
+              <label for="question">Question (max 140 chars):</label>
+              <input
+                type="text"
+                id="question"
+                name="question"
+                maxlength="140"
+                placeholder="Enter Question"
+                required
+              />
+              </div>
+              <div id="options">
+                <label>Answers:</label>
+                <div class="option">
+                  <input type="radio" name="correct" value="0" required />
+                  <input
+                    type="text"
+                    class="option-input"
+                    name="option1"
+                    required
+                  />
+                </div>
+                <div class="option">
+                  <input type="radio" name="correct" value="1" required />
+                  <input
+                    type="text"
+                    class="option-input"
+                    name="option2"
+                    required
+                  />
+                </div>
+                <div class="option">
+                  <input type="radio" name="correct" value="2" required />
+                  <input
+                    type="text"
+                    class="option-input"
+                    name="option3"
+                    required
+                  />
+                </div>
+                <div class="option">
+                  <input type="radio" name="correct" value="3" required />
+                  <input
+                    type="text"
+                    class="option-input"
+                    name="option4"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="button-container">
+                <button type="submit" class="save-question">
+                  Save Question
+                </button>
+                <button type="button" class="playGame">Play Game</button>
+                <p class="returnText"></p>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="footer">© 2025 Quiz Manager</div>
+      </section>
+    </main>
+    <script src="./js/createQuiz.js"></script>
+  </body>
+</html>
