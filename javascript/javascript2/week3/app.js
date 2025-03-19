@@ -1,7 +1,6 @@
 const startbutton = document.querySelector(".startBtn");
 const createbutton = document.querySelector(".createBtn");
 const containerCreate = document.querySelector(".container-create");
-const mainContainer = document.querySelector(".container");
 
 containerCreate.style.display = "none";
 const anotherPage = (path) => {
@@ -9,11 +8,17 @@ const anotherPage = (path) => {
 };
 
 const showCreateQuiz = () => {
-  mainContainer.style.display = "none"; // Hide the main container
+  // Hide all sections before showing the new one
+  document.querySelectorAll("section").forEach((section) => {
+    section.style.display = "none";
+  });
+
   containerCreate.style.display = "block"; // Show the create quiz section
 };
 
-startbutton.addEventListener("click", showCreateQuiz);
+startbutton.addEventListener("click", () => {
+  anotherPage("./startQuiz/index.html");
+});
 
 createbutton.addEventListener("click", () =>
   anotherPage("./createQuiz/index.html")
