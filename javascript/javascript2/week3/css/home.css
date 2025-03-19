@@ -4,14 +4,14 @@
   padding: 0;
 }
 body {
-  overflow: hidden; /* Disable scrolling */
-  margin: 0; /* Remove default margin */
+  overflow: hidden;
+  margin: 0;
 }
 main {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh; /* Full height of the viewport */
+  height: 100vh;
   background-color: hsla(0, 2%, 11%, 0.957);
   font-family: Arial, sans-serif;
   margin: 0;
@@ -21,7 +21,7 @@ main {
 .container {
   display: flex;
   width: 70%;
-  height: auto; /* Full height of the viewport */
+  height: auto;
   background-color: hsl(0, 4%, 85%);
   font-family: Arial, sans-serif;
   height: auto;

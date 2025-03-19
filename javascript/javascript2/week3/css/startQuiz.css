@@ -36,8 +36,6 @@ body {
   text-align: center;
 }
 
-/* Make the Section Expand to Push Footer Down */
-
 /* Container*/
 .container {
   display: flex;

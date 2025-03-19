@@ -1,6 +1,7 @@
 const startbutton = document.querySelector(".startBtn");
 const createbutton = document.querySelector(".createBtn");
 
+//function
 const anotherPage = (path) => {
   window.location.href = path;
 };
