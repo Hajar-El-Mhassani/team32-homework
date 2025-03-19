@@ -180,9 +180,9 @@ const addQuestion = (event) => {
 window.addEventListener("DOMContentLoaded", selectcategories);
 form.addEventListener("submit", addQuestion);
 
-const playGameButton = document.querySelector(".play-game");
+const playGameButton = document.querySelector(".playGame");
 
 //When clicked, redirect to the home page or quiz start page
 playGameButton.addEventListener("click", () => {
-  window.location.href = "index.html";
+  window.location.href = "../index.html";
 });
