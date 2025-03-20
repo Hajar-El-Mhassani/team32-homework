@@ -48,7 +48,7 @@ const insertQuestion = () => {
 };
 
 const randomBtn = (array) => {
-  return array.sort(() => Math.random() - 0.5);
+  return array.slice().sort(() => Math.random() - 0.5);
 };
 
 const insertButton = () => {
@@ -87,17 +87,11 @@ const insertButton = () => {
   });
 };
 
-// Function to load a new random question
-const nextQuestion = () => {
-  currentQuestion =
-    quizQuestions[Math.floor(Math.random() * quizQuestions.length)];
-  insertQuestion();
-  insertButton();
-};
-
-// Add click event for "Next Question" button
-nextBtn.addEventListener("click", nextQuestion);
-
 // Initialize quiz on page load
+const resetBtn = document.getElementsByClassName("random");
+
+resetBtn[0].addEventListener("click", () => {
+  insertButton();
+});
 insertQuestion();
 insertButton();
