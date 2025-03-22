@@ -6,19 +6,16 @@
 }
 html,
 body {
-  height: auto;
-  min-height: 100vh;
-  overflow-x: hidden;
-  overflow-y: auto;
+  height: 100%;
+  background-color: #3f3c3c;
 }
 
 .section {
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
   align-items: center;
+  min-height: 100vh;
   background-color: #3f3c3c;
-  width: 100%;
   padding: 10px;
 }
 
@@ -111,7 +108,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+
   max-width: 700px;
   width: 100%;
   text-align: center;
@@ -140,12 +137,12 @@ body {
   gap: 10px;
   background: #fff;
   border: 1px solid #ccc;
-  border-radius: 10px;
+  border-radius: 5px;
   padding: 10px;
   width: 100%;
   max-width: 210px;
-  border: 2px solid rgb(166 215 46);
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+
+  box-shadow: 0 2px 5px rgba(244, 244, 244, 0.139);
 }
 
 .quiz-card h3 {
@@ -191,15 +188,14 @@ body {
 
 /* Footer */
 footer {
-  background: #fffdfd;
+  background-color: #f4f4f4;
   color: #000;
   text-align: center;
   padding: 10px;
   font-size: 14px;
-  margin-top: 5px;
 
-  width: 100%;
-  max-width: 700px;
+  margin: 0 auto;
+  width: 700px;
 }
 
 /* Media Query for Tablets & Desktops */

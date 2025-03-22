@@ -245,14 +245,11 @@ function filterCategories(searchTerm = "") {
   quizListContainer.innerHTML = "";
 
   // Filter category names that match the search
-  const filtered = categories.filter((category) =>
-    category.name.toLowerCase().includes(searchTerm.toLowerCase())
+  const filtered = categories.filter(
+    (category) =>
+      category.name.toLowerCase() !== "other" &&
+      category.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
-
-  if (filtered.length === 0) {
-    quizListContainer.innerHTML = `<p style="color: gray;">No categories found.</p>`;
-    return;
-  }
 
   filtered.forEach((cat) => {
     // Count how many questions belong to this category
