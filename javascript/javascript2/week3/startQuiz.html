@@ -9,19 +9,33 @@
   <body>
     <!-- section-->
     <section class="section">
-      <div class="header-container"></div>
-      <div class="container">
-        <h1 class="question"></h1>
-        <div class="btn-group"></div>
-        <p class="explanation"></p>
-        <div class="btn-container">
-          <button class="random" onclick=" nextQuestion()">Reset</button>
+      <div class="header-container">
+        <div class="close-header">
+          <i class="fa-solid fa-xmark" id="close"></i>
+        </div>
+        <div class="search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <input
+            type="search"
+            placeholder="Search by title or category"
+            class="input-search"
+            id="searchInput"
+          />
         </div>
       </div>
+
+      <div class="container">
+        <div id="quiz-list" class="quiz-container"></div>
+      </div>
+
       <footer>
-        <p>&copy; 2025 Develeped by Hajar El Mhassani. All rights reserved.</p>
+        <p>&copy; 2025 Developed by Hajar El Mhassani. All rights reserved.</p>
       </footer>
     </section>
-    <script src="./js/startQuiz.js"></script>
+    <script
+      src="https://kit.fontawesome.com/635177b7af.js"
+      crossorigin="anonymous"
+    ></script>
+    <script src="./js/createQuiz.js"></script>
   </body>
 </html>

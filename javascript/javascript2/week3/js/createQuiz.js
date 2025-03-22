@@ -1,10 +1,14 @@
-let quizQuestions = [];
+let quizQuestions = JSON.parse(localStorage.getItem("quizQuestions")) || [];
 
 // Get form elements
 const form = document.getElementById("quizForm");
 const selectCategory = document.getElementById("category-select");
 const otherCategory = document.getElementById("otherCategory");
 const message = document.querySelector(".returnText");
+const quizListContainer = document.getElementById("quiz-list");
+const playGameButton = document.querySelector(".playGame");
+const searchInput = document.getElementById("searchInput");
+const close = document.getElementById("close");
 
 // Categories Array
 let categories = [
@@ -95,13 +99,15 @@ const addQuestion = (event) => {
   const questionText = questionInput.value.trim();
 
   // Get selected category (either from dropdown or newly added)
-  let selectedCategory = selectCategory.value;
+  let selectedCategory = "";
 
-  //If "Other" is selected
-  if (selectedCategory == 14) {
+  if (selectCategory.value == 14) {
     const newCategory = addNewCategory();
-    if (!newCategory) return; //Stop if the category already exists
-    selectedCategory = newCategory;
+    if (!newCategory) return;
+    selectedCategory = newCategory; // ✅ use new custom name
+  } else {
+    selectedCategory =
+      selectCategory.options[selectCategory.selectedIndex].textContent;
   }
 
   //Ensure a category is selected
@@ -158,13 +164,14 @@ const addQuestion = (event) => {
 
   //Create and add question object
   const newQuestion = {
-    category: selectCategory.name.trim(),
+    category: selectedCategory,
     question: questionText,
     options: options,
     correctAnswer: correctAnswer,
   };
 
   quizQuestions.push(newQuestion);
+  localStorage.setItem("quizQuestions", JSON.stringify(quizQuestions));
 
   // Debugging: Log the updated array
   console.log("Updated Questions Array:", quizQuestions);
@@ -174,15 +181,139 @@ const addQuestion = (event) => {
   otherCategory.style.display = "none";
   message.innerHTML = "Question Added Successfully!";
   message.style.color = "green";
+  displayQuizCards();
 };
 
+function displayQuizCards() {
+  const quizListContainer = document.getElementById("quiz-list");
+  if (!quizListContainer) return;
+
+  quizListContainer.innerHTML = "";
+
+  // Load from localStorage just in case
+  let quizQuestions = JSON.parse(localStorage.getItem("quizQuestions")) || [];
+
+  // Get unique list of category names
+  const allCategories = categories //
+    .map((cat) => cat.name)
+    .filter((name) => name.toLowerCase() !== "other");
+
+  const userAdded = quizQuestions
+    .map((q) => q.category)
+    .filter((name) => name.toLowerCase() !== "other");
+  // added by user
+  const uniqueCategories = Array.from(
+    new Set([...allCategories, ...userAdded])
+  );
+
+  // For each category, show card (even if empty)
+  uniqueCategories.forEach((category) => {
+    const questionsInCategory = quizQuestions.filter(
+      (q) => q.category === category
+    );
+
+    const card = document.createElement("div");
+    card.className = "quiz-card";
+    card.innerHTML = `
+       <h3>${category}</h3>
+      <p>${questionsInCategory.length} question(s)</p>
+  
+     <button class="play-btn" ${
+       questionsInCategory.length === 0 ? "disabled" : ""
+     }>Play</button>
+      <button class="delete-btn" ${
+        questionsInCategory.length === 0 ? "disabled" : ""
+      }>Delete</button> 
+    `;
+
+    card.querySelector(".play-btn").addEventListener("click", () => {
+      alert(`Start playing quiz: ${category}`);
+    });
+
+    card.querySelector(".delete-btn").addEventListener("click", () => {
+      if (confirm(`Delete all questions in "${category}"?`)) {
+        quizQuestions = quizQuestions.filter((q) => q.category !== category);
+        localStorage.setItem("quizQuestions", JSON.stringify(quizQuestions));
+        displayQuizCards();
+      }
+    });
+
+    quizListContainer.appendChild(card);
+  });
+}
+function filterCategories(searchTerm = "") {
+  quizListContainer.innerHTML = "";
+
+  // Filter category names that match the search
+  const filtered = categories.filter((category) =>
+    category.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (filtered.length === 0) {
+    quizListContainer.innerHTML = `<p style="color: gray;">No categories found.</p>`;
+    return;
+  }
+
+  filtered.forEach((cat) => {
+    // Count how many questions belong to this category
+    const count = quizQuestions.filter(
+      (q) => q.category.toLowerCase() === cat.name.toLowerCase()
+    ).length;
+
+    const card = document.createElement("div");
+    card.className = "quiz-card";
+    card.innerHTML = `
+      <h3>${cat.name}</h3>
+      <p>${count} question(s)</p>
+      <div class="btn-group">
+        <button class="play-btn" ${count === 0 ? "disabled" : ""}>Play</button>
+        <button class="delete-btn" ${
+          count === 0 ? "disabled" : ""
+        }>Delete</button>
+      </div>
+    `;
+
+    card.querySelector(".play-btn")?.addEventListener("click", () => {
+      alert(`Start playing quiz: ${cat.name}`);
+    });
+
+    card.querySelector(".delete-btn")?.addEventListener("click", () => {
+      if (confirm(`Delete all questions in "${cat.name}"?`)) {
+        quizQuestions = quizQuestions.filter(
+          (q) => q.category.toLowerCase() !== cat.name.toLowerCase()
+        );
+        localStorage.setItem("quizQuestions", JSON.stringify(quizQuestions));
+        filterCategories(searchTerm); // Refresh with same filter
+      }
+    });
+
+    quizListContainer.appendChild(card);
+  });
+}
+
+function searchQuizzes() {
+  const query = document.getElementById("searchInput").value.trim();
+  filterCategories(query);
+}
+
 //Attach Event Listeners
-window.addEventListener("DOMContentLoaded", selectcategories);
-form.addEventListener("submit", addQuestion);
+window.addEventListener("DOMContentLoaded", () => {
+  if (form && selectCategory) {
+    selectcategories(); //Only run if we're on the create page
+    form.addEventListener("submit", addQuestion);
+  }
 
-const playGameButton = document.querySelector(".playGame");
+  if (quizListContainer) {
+    displayQuizCards(); //Only run on startQuiz.html
+  }
 
-//When clicked, redirect to the home page or quiz start page
-playGameButton.addEventListener("click", () => {
-  window.location.href = "../index.html";
+  if (playGameButton) {
+    playGameButton.addEventListener("click", () => {
+      window.location.href = "./index.html";
+    });
+  }
+});
+searchInput.addEventListener("input", searchQuizzes);
+close.addEventListener("click", () => {
+  window.location.href = "./index.html";
 });

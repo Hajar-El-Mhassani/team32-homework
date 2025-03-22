@@ -24,7 +24,7 @@ main {
   height: auto;
   background-color: hsl(0, 4%, 85%);
   font-family: Arial, sans-serif;
-  height: auto;
+
   overflow: hidden;
 }
 .content {
