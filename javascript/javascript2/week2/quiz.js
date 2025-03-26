@@ -1,10 +1,10 @@
 let quizQuestions = [];
 
-const form = document.getElementById("quizForm");
+const formContainer = document.getElementById("quizForm");
 const optionsContainer = document.getElementById("options");
 const quizList = document.getElementById("quizList");
 
-form.addEventListener("submit", (event) => {
+formContainer.addEventListener("submit", (event) => {
   event.preventDefault();
 
   let questionText = document.getElementById("question").value.trim();
@@ -32,7 +32,7 @@ form.addEventListener("submit", (event) => {
 
   quizQuestions.push(newQuestion);
   updateQuizList();
-  form.reset();
+  formContainer.reset();
 });
 
 const randomizeOptions = () => {
