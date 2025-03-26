@@ -9,6 +9,7 @@ const quizListContainer = document.getElementById("quiz-list");
 const playGameButton = document.querySelector(".playGame");
 const searchInput = document.getElementById("searchInput");
 const close = document.getElementById("close");
+const questionList = document.getElementById("question-list");
 
 // Categories Array
 let categories = [
@@ -184,64 +185,49 @@ const addQuestion = (event) => {
   displayQuizCards();
 };
 
-function displayQuizCards() {
-  const quizListContainer = document.getElementById("quiz-list");
-  if (!quizListContainer) return;
+const displayQuizCards = () => {
+  if (!quizListContainer || !questionList) return;
 
   quizListContainer.innerHTML = "";
 
-  // Load from localStorage just in case
   let quizQuestions = JSON.parse(localStorage.getItem("quizQuestions")) || [];
 
-  // Get unique list of category names
-  const allCategories = categories //
+  const allCategories = categories
     .map((cat) => cat.name)
     .filter((name) => name.toLowerCase() !== "other");
 
   const userAdded = quizQuestions
     .map((q) => q.category)
     .filter((name) => name.toLowerCase() !== "other");
-  // added by user
+
   const uniqueCategories = Array.from(
     new Set([...allCategories, ...userAdded])
   );
 
-  // For each category, show card (even if empty)
   uniqueCategories.forEach((category) => {
-    const questionsInCategory = quizQuestions.filter(
+    const questionsForCard = quizQuestions.filter(
       (q) => q.category === category
     );
 
     const card = document.createElement("div");
     card.className = "quiz-card";
     card.innerHTML = `
-       <h3>${category}</h3>
-      <p>${questionsInCategory.length} question(s)</p>
-  
-     <button class="play-btn" ${
-       questionsInCategory.length === 0 ? "disabled" : ""
-     }>Play</button>
-      <button class="delete-btn" ${
-        questionsInCategory.length === 0 ? "disabled" : ""
-      }>Delete</button> 
+      <h3>${category}</h3>
+      <p>${questionsForCard.length} question(s)</p>
+      <button class="play-btn" ${
+        questionsForCard.length === 0 ? "disabled" : ""
+      }>Play</button>
     `;
 
     card.querySelector(".play-btn").addEventListener("click", () => {
-      alert(`Start playing quiz: ${category}`);
-    });
-
-    card.querySelector(".delete-btn").addEventListener("click", () => {
-      if (confirm(`Delete all questions in "${category}"?`)) {
-        quizQuestions = quizQuestions.filter((q) => q.category !== category);
-        localStorage.setItem("quizQuestions", JSON.stringify(quizQuestions));
-        displayQuizCards();
-      }
+      showQuestionsForCategory(category);
     });
 
     quizListContainer.appendChild(card);
   });
-}
-function filterCategories(searchTerm = "") {
+};
+
+const filterCategories = (searchTerm = "") => {
   quizListContainer.innerHTML = "";
 
   // Filter category names that match the search
@@ -264,34 +250,145 @@ function filterCategories(searchTerm = "") {
       <p>${count} question(s)</p>
       <div class="btn-group">
         <button class="play-btn" ${count === 0 ? "disabled" : ""}>Play</button>
-        <button class="delete-btn" ${
-          count === 0 ? "disabled" : ""
-        }>Delete</button>
+      
       </div>
     `;
-
-    card.querySelector(".play-btn")?.addEventListener("click", () => {
-      alert(`Start playing quiz: ${cat.name}`);
-    });
-
-    card.querySelector(".delete-btn")?.addEventListener("click", () => {
-      if (confirm(`Delete all questions in "${cat.name}"?`)) {
-        quizQuestions = quizQuestions.filter(
-          (q) => q.category.toLowerCase() !== cat.name.toLowerCase()
-        );
-        localStorage.setItem("quizQuestions", JSON.stringify(quizQuestions));
-        filterCategories(searchTerm); // Refresh with same filter
-      }
+    card.querySelector(".play-btn").addEventListener("click", () => {
+      showQuestionsForCategory(cat.name);
     });
 
     quizListContainer.appendChild(card);
   });
+};
+function showQuestionsForCategory(categoryName) {
+  const questionList = document.getElementById("question-list");
+  const quizListContainer = document.getElementById("quiz-list");
+
+  quizListContainer.style.display = "none";
+  questionList.style.display = "block";
+  questionList.innerHTML = "";
+  searchInput.placeholder = "Search by question ...";
+
+  // Reset input listeners (remove old ones)
+  const newSearchInput = searchInput.cloneNode(true);
+  searchInput.parentNode.replaceChild(newSearchInput, searchInput);
+
+  // Add new input listener
+  newSearchInput.addEventListener("input", (e) => {
+    const searchTerm = e.target.value;
+    filterQuestionsByText(searchTerm, categoryName);
+  });
+
+  const questions = quizQuestions.filter(
+    (q) => q.category.toLowerCase() === categoryName.toLowerCase()
+  );
+
+  const header = document.createElement("div");
+  header.className = "headerQuestions";
+  header.innerHTML = `<h3>${categoryName}</h3><p>${questions.length} question(s)</p>`;
+  questionList.appendChild(header);
+
+  questions.forEach((q, index) => {
+    const card = document.createElement("div");
+    card.className = "question-card";
+    card.innerHTML = `
+      <p><strong>Q${index + 1}:</strong> ${q.question}</p>
+      <ul class="option-list">${q.options
+        .map((opt) => `<li class="answer-option">${opt}</li>`)
+        .join("")}</ul>
+        <button class="delete-btn">Delete Question</button>
+    `;
+
+    const deleteBtn = card.querySelector(".delete-btn");
+    deleteBtn.addEventListener("click", () => {
+      deleteQuestionFromCategory(q.question, categoryName);
+    });
+    questionList.appendChild(card);
+  });
+  const playButton = document.createElement("div");
+  playButton.className = "btn-group";
+  playButton.innerHTML = `<button class="play-quiz" ${
+    questions.length === 0 ? "disabled" : ""
+  }>Play Quiz</button>`;
+  questionList.appendChild(playButton);
+}
+function filterQuestionsByText(searchText, categoryName) {
+  const questionList = document.getElementById("question-list");
+  questionList.innerHTML = ""; // clear current view
+
+  const allQuestions = JSON.parse(localStorage.getItem("quizQuestions")) || [];
+
+  // Filter by category first
+  const questionsInCategory = allQuestions.filter(
+    (q) => q.category.toLowerCase() === categoryName.toLowerCase()
+  );
+  // Then filter by question text
+  const filteredQuestions = searchText
+    ? questionsInCategory.filter((q) =>
+        q.question.toLowerCase().includes(searchText.toLowerCase())
+      )
+    : questionsInCategory; // Return all if searchText is empty
+
+  if (filteredQuestions.length === 0) {
+    questionList.innerHTML = `
+      <div class="headerQuestions">
+        <h3>${categoryName}</h3>
+        <p>${questionsInCategory.length} total question(s)</p>
+      </div>
+      <p style="color: gray;">No questions match your search.</p>
+    `;
+    return;
+  }
+  const header = document.createElement("div");
+  header.className = "headerQuestions";
+  header.innerHTML = `<h3>${categoryName}</h3><p>${filteredQuestions.length} question(s)</p>`;
+  questionList.appendChild(header);
+
+  filteredQuestions.forEach((q, index) => {
+    const questionCard = document.createElement("div");
+    questionCard.className = "question-card";
+    questionCard.innerHTML = `
+      <p><strong>Q${index + 1}:</strong> ${q.question}</p>
+      <ul class="option-list">
+        ${q.options.map((opt) => `<li answer-option>${opt}</li>`).join("")}
+      </ul>
+      <button class="delete-btn">Delete Question</button>
+    `;
+
+    const deleteBtn = questionCard.querySelector(".delete-btn");
+    deleteBtn.addEventListener("click", () => {
+      deleteQuestionFromCategory(q.question, categoryName);
+    });
+    questionList.appendChild(questionCard);
+  });
+  const playButton = document.createElement("div");
+  playButton.className = "btn-group";
+  playButton.innerHTML = `<button class="play-quiz" ${
+    filteredQuestions.length === 0 ? "disabled" : ""
+  }>Play Quiz</button>`;
+  questionList.appendChild(playButton);
+}
+function deleteQuestionFromCategory(questionText, categoryName) {
+  let allQuestions = JSON.parse(localStorage.getItem("quizQuestions")) || [];
+
+  // Remove question by matching both category and question
+  allQuestions = allQuestions.filter(
+    (q) =>
+      !(
+        q.category.toLowerCase() === categoryName.toLowerCase() &&
+        q.question.toLowerCase() === questionText.toLowerCase()
+      )
+  );
+
+  localStorage.setItem("quizQuestions", JSON.stringify(allQuestions));
+
+  filterQuestionsByText(searchInput.value, categoryName);
 }
 
-function searchQuizzes() {
+const searchQuizzes = () => {
   const query = document.getElementById("searchInput").value.trim();
   filterCategories(query);
-}
+};
 
 //Attach Event Listeners
 window.addEventListener("DOMContentLoaded", () => {

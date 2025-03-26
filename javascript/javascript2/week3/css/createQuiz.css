@@ -23,8 +23,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 150px; /* Adjust based on your needs */
-  background-image: url("../images/image.jpg"); /* Ensure this path is correct */
+  height: 150px;
+  background-image: url("../images/image.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

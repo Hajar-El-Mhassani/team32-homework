@@ -24,11 +24,13 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 150px; /* Adjust based on your needs */
-  background-image: url("../images/image.jpg"); /* Ensure this path is correct */
+  background-image: url("../images/image.jpg");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
+  height: 150px; /* Adjust based on your needs */
+  background-color: #f4f4f4;
+
   max-width: 700px;
   width: 100%;
   position: relative;
@@ -50,21 +52,32 @@ body {
   width: 20px;
   height: 24px;
 }
+.header-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  height: 100%;
+  max-width: 100%;
 
+  width: 60%;
+  padding: 0;
+  margin-top: 0 auto;
+}
 .search {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  width: 50%;
+  width: 70%;
   max-width: 100%;
   height: 40px;
   padding: 20px 10px;
   background-color: #fff;
   gap: 10px;
   border-radius: 10px;
-  border: 1px solid #000;
-  outline: 1px solid black;
+  border: 2px solid rgb(243, 214, 26);
+  outline: 2px solid rgb(243, 214, 26);
   outline-offset: -4px;
   overflow: hidden;
 }
@@ -114,7 +127,7 @@ body {
   text-align: center;
   background: white;
   padding: 20px;
-  height: auto;
+  height: 100vh;
   box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.3);
 }
 
@@ -127,6 +140,105 @@ body {
   height: auto;
   width: 100%;
   max-width: 700px;
+}
+
+#question-list {
+  display: flex;
+  flex-direction: column;
+
+  gap: 16px;
+  width: 100%;
+}
+
+.headerQuestions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  background-color: #f3f3f3;
+  border-left: 5px solid #0ca5a5;
+  padding: 15px;
+  border-radius: 5px;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 10px 0;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+.headerQuestions h3 {
+  margin: 0;
+  font-size: 22px;
+  color: #333;
+  text-align: left;
+  width: 100%;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+.headerQuestions p {
+  margin: 8px 0 0;
+  font-size: 14px;
+  color: #666;
+  width: 100%;
+  text-align: left;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+/* Question Card */
+.question-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 8px;
+  width: 100%;
+  margin: 10px 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  box-sizing: border-box;
+}
+.btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+.question-card p {
+  margin-bottom: 12px;
+  font-weight: bold;
+  font-size: 16px;
+  color: #222;
+  width: 100%;
+}
+
+.option-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+.option-list li {
+  background-color: #f0f0f0;
+  border-radius: 5px;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #333;
+  width: 100%;
+  box-sizing: border-box;
+  transition: background-color 0.2s ease;
+}
+
+.option-list li:hover {
+  background-color: #e0e0e0;
 }
 
 .quiz-card {
@@ -152,31 +264,44 @@ body {
 .quiz-card button {
   margin-right: 10px;
 }
+.play-quiz {
+  padding: 12px 20px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: 0.3s;
+  width: 100%;
+  font-weight: bold;
+  color: white;
+  background-color: #a6d62e;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
 
+.play-quiz:hover {
+  background: #018f8f;
+}
 .play-btn {
-  background-color: green;
   color: white;
   padding: 5px 10px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  background-color: #0ca5a5;
+  width: 100%;
 }
 .delete-btn {
   background-color: red;
   color: white;
-  padding: 5px;
+  padding: 7px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
+  font-weight: bold;
 }
-.delete-btn:disabled {
-  background-color: gainsboro;
-  color: white;
-  padding: 5px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
+
 .play-btn:disabled {
   background-color: gainsboro;
   color: white;
@@ -193,9 +318,14 @@ footer {
   text-align: center;
   padding: 10px;
   font-size: 14px;
-
+  width: 100%;
   margin: 0 auto;
-  width: 700px;
+  max-width: 700px;
 }
 
 /* Media Query for Tablets & Desktops */
+@media screen and (max-width: 768px) {
+  footer {
+    width: 96%;
+  }
+}
