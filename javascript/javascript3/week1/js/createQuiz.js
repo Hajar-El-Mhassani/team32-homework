@@ -1,4 +1,9 @@
-let quizQuestions = JSON.parse(localStorage.getItem("quizQuestions")) || [];
+//Replaced localStorage with a fetch  to get data from API
+const API_URL =
+  "https://raw.githubusercontent.com/Hajar-El-Mhassani/Hajar-El-Mhassani.github.io/main/quizData/quiz/questionQuiz.json";
+
+let quizQuestions = [];
+let apiQuestions = [];
 
 // Get form elements
 const form = document.getElementById("quizForm");
@@ -29,16 +34,85 @@ let categories = [
   { name: "Other", value: 14 },
 ];
 
-//Function 1: Populate Categories in the Dropdown
-const selectcategories = () => {
-  selectCategory.innerHTML = `<option value="" disabled selected>Select a category</option>`;
+const fetchQuestions = () => {
+  fetch(API_URL)
+    .then((res) => res.json())
+    .then((data) => {
+      if (Array.isArray(data)) {
+        apiQuestions = data;
+      } else if (Array.isArray(data.questions)) {
+        apiQuestions = data.questions;
+      } else {
+        console.error("API returned unexpected format:", data);
+        apiQuestions = [];
+      }
+      const localQuestions =
+        JSON.parse(localStorage.getItem("quizQuestions")) || [];
+      quizQuestions = [...apiQuestions, ...localQuestions];
 
+      // Merge user-added categories from questions
+      const allCategories = quizQuestions.map((q) => q.category);
+      const unique = [...new Set(allCategories)].filter(
+        (cat) =>
+          !categories.find((c) => c.name.toLowerCase() === cat.toLowerCase())
+      );
+      unique.forEach((cat) => {
+        categories.push({ name: cat, value: categories.length + 1 });
+      });
+
+      updateCategorySelect();
+      searchInput.value = "";
+      displayQuizCards();
+    })
+    .catch((err) => {
+      console.error("Failed to fetch API questions:", err);
+      const localQuestions =
+        JSON.parse(localStorage.getItem("quizQuestions")) || [];
+      quizQuestions = [...localQuestions];
+
+      updateCategorySelect();
+      searchInput.value = "";
+      displayQuizCards();
+    });
+};
+
+const updateCategorySelect = () => {
+  if (!selectCategory) return;
+  selectCategory.innerHTML = `<option value="" disabled selected>Select a category</option>`;
   categories.forEach((category) => {
     let option = document.createElement("option");
     option.value = category.value;
     option.textContent = category.name;
     selectCategory.appendChild(option);
   });
+};
+
+const postQuestion = (newQuestion) => {
+  const localQuestions =
+    JSON.parse(localStorage.getItem("quizQuestions")) || [];
+  localQuestions.push(newQuestion);
+  localStorage.setItem("quizQuestions", JSON.stringify(localQuestions));
+
+  quizQuestions = [...apiQuestions, ...localQuestions];
+
+  // Add the category if it's new
+  const exists = categories.find(
+    (cat) => cat.name.toLowerCase() === newQuestion.category.toLowerCase()
+  );
+  if (!exists) {
+    categories.push({
+      name: newQuestion.category,
+      value: categories.length + 1,
+    });
+    updateCategorySelect();
+  }
+
+  displayQuizCards();
+};
+
+//Function 1: Populate Categories in the Dropdown
+const selectcategories = () => {
+  updateCategorySelect(); //Always refresh dropdown options
 
   // Show "Other" input field when selected
   selectCategory.addEventListener("change", () => {
@@ -50,6 +124,7 @@ const selectcategories = () => {
     }
   });
 };
+
 //function 2: add new Category
 const addNewCategory = () => {
   const newCategory = otherCategory.value.trim();
@@ -93,7 +168,7 @@ const addNewCategory = () => {
 
 // add question
 const addQuestion = (event) => {
-  event.preventDefault(); // Prevent page reload
+  event.preventDefault();
 
   // Get form values
   const questionInput = document.getElementById("question");
@@ -105,7 +180,7 @@ const addQuestion = (event) => {
   if (selectCategory.value == 14) {
     const newCategory = addNewCategory();
     if (!newCategory) return;
-    selectedCategory = newCategory; // ✅ use new custom name
+    selectedCategory = newCategory; //
   } else {
     selectedCategory =
       selectCategory.options[selectCategory.selectedIndex].textContent;
@@ -119,13 +194,13 @@ const addQuestion = (event) => {
   }
 
   // Get answer options
-  const options = Array.from(document.querySelectorAll(".option-input")).map(
-    (input) => input.value.trim()
-  );
+  const optionsText = Array.from(
+    document.querySelectorAll(".option-input")
+  ).map((input) => input.value.trim());
 
   // Check for duplicate options
-  const uniqueOptions = new Set(options);
-  if (uniqueOptions.size !== options.length) {
+  const uniqueOptions = new Set(optionsText);
+  if (uniqueOptions.size !== optionsText.length) {
     message.innerHTML = "Error: Answer options must be unique.";
     message.style.color = "red";
     return;
@@ -140,8 +215,11 @@ const addQuestion = (event) => {
     message.style.color = "red";
     return;
   }
-  const correctAnswerIndex = parseInt(correctAnswerRadio.value);
-  const correctAnswer = options[correctAnswerIndex];
+  const correctIndex = parseInt(correctAnswerRadio.value);
+  const options = optionsText.map((text, index) => ({
+    text,
+    isCorrect: index === correctIndex,
+  }));
 
   // Validate form data
   if (!questionText || options.some((opt) => opt === "")) {
@@ -167,14 +245,12 @@ const addQuestion = (event) => {
   const newQuestion = {
     category: selectedCategory,
     question: questionText,
-    options: options,
-    correctAnswer: correctAnswer,
+    options,
+    explanation: "",
   };
 
-  quizQuestions.push(newQuestion);
-  localStorage.setItem("quizQuestions", JSON.stringify(quizQuestions));
+  postQuestion(newQuestion);
 
-  // Debugging: Log the updated array
   console.log("Updated Questions Array:", quizQuestions);
 
   // Reset the form fields
@@ -184,29 +260,20 @@ const addQuestion = (event) => {
   message.style.color = "green";
   displayQuizCards();
 };
-
 const displayQuizCards = () => {
   if (!quizListContainer || !questionList) return;
 
   quizListContainer.innerHTML = "";
 
-  let quizQuestions = JSON.parse(localStorage.getItem("quizQuestions")) || [];
-
-  const allCategories = categories
-    .map((cat) => cat.name)
-    .filter((name) => name.toLowerCase() !== "other");
-
-  const userAdded = quizQuestions
-    .map((q) => q.category)
-    .filter((name) => name.toLowerCase() !== "other");
-
-  const uniqueCategories = Array.from(
-    new Set([...allCategories, ...userAdded])
+  // Combine predefined categories with dynamic ones (already done during fetch)
+  const allCategories = categories.filter(
+    (cat) => cat.name.toLowerCase() !== "other"
   );
 
-  uniqueCategories.forEach((category) => {
+  allCategories.forEach((categoryObj) => {
+    const category = categoryObj.name;
     const questionsForCard = quizQuestions.filter(
-      (q) => q.category === category
+      (q) => q.category.toLowerCase() === category.toLowerCase()
     );
 
     const card = document.createElement("div");
@@ -230,36 +297,38 @@ const displayQuizCards = () => {
 const filterCategories = (searchTerm = "") => {
   quizListContainer.innerHTML = "";
 
-  // Filter category names that match the search
-  const filtered = categories.filter(
-    (category) =>
-      category.name.toLowerCase() !== "other" &&
-      category.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filter categories based on the search term
+  const filteredCategories = categories.filter(
+    (cat) =>
+      cat.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      cat.name.toLowerCase() !== "other"
   );
 
-  filtered.forEach((cat) => {
-    // Count how many questions belong to this category
-    const count = quizQuestions.filter(
-      (q) => q.category.toLowerCase() === cat.name.toLowerCase()
-    ).length;
+  filteredCategories.forEach((category) => {
+    const questionsInCategory = quizQuestions.filter(
+      (q) => q.category.toLowerCase() === category.name.toLowerCase()
+    );
 
     const card = document.createElement("div");
     card.className = "quiz-card";
     card.innerHTML = `
-      <h3>${cat.name}</h3>
-      <p>${count} question(s)</p>
+      <h3>${category.name}</h3>
+      <p>${questionsInCategory.length} question(s)</p>
       <div class="btn-group">
-        <button class="play-btn" ${count === 0 ? "disabled" : ""}>Play</button>
-      
+        <button class="play-btn" ${
+          questionsInCategory.length === 0 ? "disabled" : ""
+        }>Play</button>
       </div>
     `;
+
     card.querySelector(".play-btn").addEventListener("click", () => {
-      showQuestionsForCategory(cat.name);
+      showQuestionsForCategory(category.name);
     });
 
     quizListContainer.appendChild(card);
   });
 };
+
 function showQuestionsForCategory(categoryName) {
   const questionList = document.getElementById("question-list");
   const quizListContainer = document.getElementById("quiz-list");
@@ -269,7 +338,6 @@ function showQuestionsForCategory(categoryName) {
   questionList.innerHTML = "";
   searchInput.placeholder = "Search by question ...";
 
-  // Reset input listeners (remove old ones)
   const newSearchInput = searchInput.cloneNode(true);
   searchInput.parentNode.replaceChild(newSearchInput, searchInput);
 
@@ -294,7 +362,7 @@ function showQuestionsForCategory(categoryName) {
     card.innerHTML = `
       <p><strong>Q${index + 1}:</strong> ${q.question}</p>
       <ul class="option-list">${q.options
-        .map((opt) => `<li class="answer-option">${opt}</li>`)
+        .map((opt) => `<li class="answer-option">${opt.text}</li>`)
         .join("")}</ul>
         <button class="delete-btn">Delete Question</button>
     `;
@@ -312,22 +380,20 @@ function showQuestionsForCategory(categoryName) {
   }>Play Quiz</button>`;
   questionList.appendChild(playButton);
 }
+
+// Function to filter questions by text
 function filterQuestionsByText(searchText, categoryName) {
-  const questionList = document.getElementById("question-list");
-  questionList.innerHTML = ""; // clear current view
+  questionList.innerHTML = "";
 
-  const allQuestions = JSON.parse(localStorage.getItem("quizQuestions")) || [];
-
-  // Filter by category first
-  const questionsInCategory = allQuestions.filter(
+  const questionsInCategory = quizQuestions.filter(
     (q) => q.category.toLowerCase() === categoryName.toLowerCase()
   );
-  // Then filter by question text
+
   const filteredQuestions = searchText
     ? questionsInCategory.filter((q) =>
         q.question.toLowerCase().includes(searchText.toLowerCase())
       )
-    : questionsInCategory; // Return all if searchText is empty
+    : questionsInCategory;
 
   if (filteredQuestions.length === 0) {
     questionList.innerHTML = `
@@ -339,6 +405,7 @@ function filterQuestionsByText(searchText, categoryName) {
     `;
     return;
   }
+
   const header = document.createElement("div");
   header.className = "headerQuestions";
   header.innerHTML = `<h3>${categoryName}</h3><p>${filteredQuestions.length} question(s)</p>`;
@@ -350,7 +417,9 @@ function filterQuestionsByText(searchText, categoryName) {
     questionCard.innerHTML = `
       <p><strong>Q${index + 1}:</strong> ${q.question}</p>
       <ul class="option-list">
-        ${q.options.map((opt) => `<li answer-option>${opt}</li>`).join("")}
+        ${q.options
+          .map((opt) => `<li class="answer-option">${opt.text}</li>`)
+          .join("")}
       </ul>
       <button class="delete-btn">Delete Question</button>
     `;
@@ -361,6 +430,7 @@ function filterQuestionsByText(searchText, categoryName) {
     });
     questionList.appendChild(questionCard);
   });
+
   const playButton = document.createElement("div");
   playButton.className = "btn-group";
   playButton.innerHTML = `<button class="play-quiz" ${
@@ -368,11 +438,11 @@ function filterQuestionsByText(searchText, categoryName) {
   }>Play Quiz</button>`;
   questionList.appendChild(playButton);
 }
-function deleteQuestionFromCategory(questionText, categoryName) {
-  let allQuestions = JSON.parse(localStorage.getItem("quizQuestions")) || [];
 
-  // Remove question by matching both category and question
-  allQuestions = allQuestions.filter(
+const deleteQuestionFromCategory = (questionText, categoryName) => {
+  let localQuestions = JSON.parse(localStorage.getItem("quizQuestions")) || [];
+
+  localQuestions = localQuestions.filter(
     (q) =>
       !(
         q.category.toLowerCase() === categoryName.toLowerCase() &&
@@ -380,17 +450,25 @@ function deleteQuestionFromCategory(questionText, categoryName) {
       )
   );
 
-  localStorage.setItem("quizQuestions", JSON.stringify(allQuestions));
+  localStorage.setItem("quizQuestions", JSON.stringify(localQuestions));
+
+  quizQuestions = quizQuestions.filter(
+    (q) =>
+      !(
+        q.category.toLowerCase() === categoryName.toLowerCase() &&
+        q.question.toLowerCase() === questionText.toLowerCase()
+      )
+  );
 
   filterQuestionsByText(searchInput.value, categoryName);
-}
+};
 
 const searchQuizzes = () => {
   const query = document.getElementById("searchInput").value.trim();
   filterCategories(query);
 };
 
-//Attach Event Listeners
+//Event Listeners
 window.addEventListener("DOMContentLoaded", () => {
   if (form && selectCategory) {
     selectcategories(); //Only run if we're on the create page
@@ -398,16 +476,18 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   if (quizListContainer) {
-    displayQuizCards(); //Only run on startQuiz.html
+    fetchQuestions(); //loads data from API + localStorage
   }
 
   if (playGameButton) {
     playGameButton.addEventListener("click", () => {
-      window.location.href = "./index.html";
+      window.location.href = "./startQuiz.html";
     });
   }
+  if (searchInput) {
+    searchInput.addEventListener("input", searchQuizzes);
+  }
 });
-searchInput.addEventListener("input", searchQuizzes);
 close.addEventListener("click", () => {
   window.location.href = "./index.html";
 });

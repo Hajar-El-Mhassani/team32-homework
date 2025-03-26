@@ -1,6 +1,6 @@
 //Replaced localStorage with a fetch  to get data from API
 const API_URL =
-  "https://raw.githubusercontent.com/Hajar-El-Mhassani/Hajar-El-Mhassani.github.io/refs/heads/main/quizData/quiz/questionQuiz.json";
+  "https://raw.githubusercontent.com/Hajar-El-Mhassani/Hajar-El-Mhassani.github.io/main/quizData/quiz/questionQuiz.json";
 
 let quizQuestions = [];
 let apiQuestions = [];
