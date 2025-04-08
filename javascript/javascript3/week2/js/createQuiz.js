@@ -18,8 +18,21 @@ const questionList = document.getElementById("question-list");
 
 // Category Class
 class Category {
+  /**
+   * Constructor for the Category class.
+   * @param {string} name - The name of the category.
+   * @param {number} value - The value of the category.
+   */
   constructor(name, value) {
+    /**
+     * The name of the category.
+     * @type {string}
+     */
     this.name = name;
+    /**
+     * The value of the category.
+     * @type {number}
+     */
     this.value = value;
   }
 
