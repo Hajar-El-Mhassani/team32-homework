@@ -5,263 +5,269 @@ const API_URL =
 let quizQuestions = [];
 let apiQuestions = [];
 
-// Get form elements
+// Get form elements (for the create quiz page)
 const form = document.getElementById("quizForm");
 const selectCategory = document.getElementById("category-select");
 const otherCategory = document.getElementById("otherCategory");
 const message = document.querySelector(".returnText");
+
+// Get common container elements (might be on different pages)
 const quizListContainer = document.getElementById("quiz-list");
-const playGameButton = document.querySelector(".playGame");
+const questionList = document.getElementById("question-list");
+const playGameButton = document.getElementById("playGame"); // On create page, "Play Quiz" button present
 const searchInput = document.getElementById("searchInput");
 const close = document.getElementById("close");
-const questionList = document.getElementById("question-list");
 
-// Category Class
-class Category {
-  /**
-   * Constructor for the Category class.
-   * @param {string} name - The name of the category.
-   * @param {number} value - The value of the category.
-   */
-  constructor(name, value) {
-    /**
-     * The name of the category.
-     * @type {string}
-     */
-    this.name = name;
-    /**
-     * The value of the category.
-     * @type {number}
-     */
-    this.value = value;
-  }
+// This container exists in startQuiz.html for interactive quiz mode.
+const startQuizContainer = document.getElementById("start-quiz");
 
-  // Add this category as an option in the select element
-  addToDropdown() {
-    const option = document.createElement("option");
-    option.value = this.value;
-    option.textContent = this.name;
-    selectCategory.appendChild(option);
-  }
-
-  // Check if this category exists in the provided categories array
-  existsIn(categoriesArray) {
-    return categoriesArray.some(
-      (cat) => cat.name.toLowerCase() === this.name.toLowerCase()
-    );
-  }
-}
-
-// Question Class
-class Question {
-  constructor(category, questionText, options, explanation = "") {
-    // Here, category is a Category instance
-    this.category = category;
-    this.questionText = questionText;
-    this.options = options;
-    this.explanation = explanation;
-  }
-}
-
-// Global array of categories as instances of Category
-let categoriesArray = [
-  new Category("General Knowledge", 1),
-  new Category("Books", 2),
-  new Category("Film", 3),
-  new Category("Music", 4),
-  new Category("Musicals & Theatres", 5),
-  new Category("Television", 6),
-  new Category("Video Games", 7),
-  new Category("Board Games", 8),
-  new Category("Science & Nature", 9),
-  new Category("Computers", 10),
-  new Category("Mathematics", 11),
-  new Category("Mythology", 12),
-  new Category("Sports", 13),
-  new Category("Other", 14),
+// Categories Array – load from localStorage if available, else use defaults
+let categories = JSON.parse(localStorage.getItem("categories")) || [
+  { name: "General Knowledge", value: 1 },
+  { name: "Books", value: 2 },
+  { name: "Film", value: 3 },
+  { name: "Music", value: 4 },
+  { name: "Musicals & Theatres", value: 5 },
+  { name: "Television", value: 6 },
+  { name: "Video Games", value: 7 },
+  { name: "Board Games", value: 8 },
+  { name: "Science & Nature", value: 9 },
+  { name: "Computers", value: 10 },
+  { name: "Mathematics", value: 11 },
+  { name: "Mythology", value: 12 },
+  { name: "Sports", value: 13 },
+  { name: "Other", value: 14 },
 ];
 
-// Fetch questions from API and merge with localStorage
+// FETCH QUESTIONS & MERGE API CATEGORIES
+
 const fetchQuestions = async () => {
   try {
     const res = await fetch(API_URL);
     const data = await res.json();
-
+    console.log("API data:", data);
     if (Array.isArray(data)) {
-      // For each fetched question, try to find its category in categoriesArray; if not, create a new Category instance
-      apiQuestions = data.map((q) => {
-        let cat = categoriesArray.find(
-          (c) => c.name.toLowerCase() === q.category.toLowerCase()
-        );
-        if (!cat) {
-          cat = new Category(q.category, categoriesArray.length + 1);
-          categoriesArray.push(cat);
-        }
-        return new Question(cat, q.question, q.options, q.explanation);
-      });
+      apiQuestions = data;
     } else if (Array.isArray(data.questions)) {
-      apiQuestions = data.questions.map((q) => {
-        let cat = categoriesArray.find(
-          (c) => c.name.toLowerCase() === q.category.toLowerCase()
-        );
-        if (!cat) {
-          cat = new Category(q.category, categoriesArray.length + 1);
-          categoriesArray.push(cat);
-        }
-        return new Question(cat, q.question, q.options, q.explanation);
-      });
+      apiQuestions = data.questions;
     } else {
       console.error("API returned unexpected format:", data);
       apiQuestions = [];
     }
-
-    const localQuestionsData =
+    const localQuestions =
       JSON.parse(localStorage.getItem("quizQuestions")) || [];
-    // localQuestionsData are plain objects; you can leave them as is or convert if needed.
-    quizQuestions = [...apiQuestions, ...localQuestionsData];
+    quizQuestions = [...apiQuestions, ...localQuestions];
 
-    // Merge user-added categories from questions in quizQuestions (each q.category is expected to be a string in local storage)
-    const allCats = quizQuestions.map((q) =>
-      typeof q.category === "string" ? q.category : q.category.name
-    );
-    const uniqueCats = [...new Set(allCats)].filter(
+    // Merge user-added categories (from any source)
+    const allCategories = quizQuestions.map((q) => q.category);
+    const unique = [...new Set(allCategories)].filter(
       (cat) =>
-        !categoriesArray.find((c) => c.name.toLowerCase() === cat.toLowerCase())
+        !categories.find(
+          (c) =>
+            c.name.trim().toLowerCase() ===
+            (typeof cat === "string"
+              ? cat.trim().toLowerCase()
+              : cat.name.trim().toLowerCase())
+        )
     );
-    uniqueCats.forEach((cat) => {
-      categoriesArray.push(new Category(cat, categoriesArray.length + 1));
+    unique.forEach((cat) => {
+      // If cat is an object use cat.name; if a string, use directly.
+      const catName = typeof cat === "string" ? cat : cat.name;
+      categories.push({ name: catName, value: categories.length + 1 });
     });
+    // Save updated categories to localStorage
+    localStorage.setItem("categories", JSON.stringify(categories));
 
     updateCategorySelect();
-    searchInput.value = "";
-    displayQuizCards();
+    if (searchInput) searchInput.value = "";
+    if (quizListContainer) displayQuizCards();
   } catch (err) {
     console.error("Failed to fetch API questions:", err);
-    const localQuestionsData =
+    const localQuestions =
       JSON.parse(localStorage.getItem("quizQuestions")) || [];
-    quizQuestions = [...localQuestionsData];
-
+    quizQuestions = [...localQuestions];
     updateCategorySelect();
-    searchInput.value = "";
-    displayQuizCards();
+    if (searchInput) searchInput.value = "";
+    if (quizListContainer) displayQuizCards();
   }
 };
 
-// Update the category select dropdown using our Category instances
+// UPDATE THE CATEGORY SELECT DROPDOWN (OTHER ALWAYS LAST)
+
 const updateCategorySelect = () => {
+  // Retrieve categories from localStorage if available; else use current array.
+  const savedCategories =
+    JSON.parse(localStorage.getItem("categories")) || categories;
   if (!selectCategory) return;
   selectCategory.innerHTML = `<option value="" disabled selected>Select a category</option>`;
-  categoriesArray.forEach((category) => {
-    category.addToDropdown();
+
+  // Separate out non-"Other" categories
+  const nonOther = savedCategories.filter(
+    (cat) => cat.name.trim().toLowerCase() !== "other"
+  );
+  nonOther.forEach((category) => {
+    let option = document.createElement("option");
+    option.value = category.value;
+    option.textContent = category.name;
+    selectCategory.appendChild(option);
   });
+  // Append "Other" as the last option
+  const other = savedCategories.find(
+    (cat) => cat.name.trim().toLowerCase() === "other"
+  );
+  if (other) {
+    let option = document.createElement("option");
+    option.value = other.value;
+    option.textContent = other.name;
+    selectCategory.appendChild(option);
+  }
 };
 
-// Post a new question to localStorage and update quizQuestions
+// POST A NEW QUESTION (SAVE TO localStorage)
+
 const postQuestion = async (newQuestion) => {
   const localQuestions =
     JSON.parse(localStorage.getItem("quizQuestions")) || [];
-  // For new questions created using our class, newQuestion is an instance of Question.
-  // We store it as a plain object for persistence.
-  localQuestions.push({
-    category: newQuestion.category.name,
-    question: newQuestion.questionText,
-    options: newQuestion.options,
-    explanation: newQuestion.explanation,
-  });
+  localQuestions.push(newQuestion);
   localStorage.setItem("quizQuestions", JSON.stringify(localQuestions));
 
+  // Merge API questions with local questions
   quizQuestions = [...apiQuestions, ...localQuestions];
+  localStorage.setItem("quizQuestions", JSON.stringify(quizQuestions));
 
-  // If the category of the new question doesn't exist in categoriesArray, add it.
-  if (
-    !categoriesArray.find(
-      (cat) =>
-        cat.name.toLowerCase() === newQuestion.category.name.toLowerCase()
-    )
-  ) {
-    categoriesArray.push(
-      new Category(newQuestion.category.name, categoriesArray.length + 1)
-    );
+  // If the category of the new question doesn't exist, add it.
+  const exists = categories.find(
+    (cat) =>
+      cat.name.trim().toLowerCase() ===
+      newQuestion.category.trim().toLowerCase()
+  );
+  if (!exists) {
+    categories.push({
+      name: newQuestion.category,
+      value: categories.length + 1,
+    });
+    localStorage.setItem("categories", JSON.stringify(categories));
     updateCategorySelect();
   }
 
   displayQuizCards();
 };
 
-// Populate Categories in the Dropdown and handle "Other" selection
+// SELECT CATEGORIES (HANDLE "OTHER" OPTION)
+
 const selectcategories = () => {
   updateCategorySelect();
-  selectCategory.addEventListener("change", () => {
-    if (selectCategory.value == 14) {
-      otherCategory.style.display = "block";
-      otherCategory.focus();
-    } else {
-      otherCategory.style.display = "none";
-    }
-  });
+  if (selectCategory) {
+    selectCategory.addEventListener("change", () => {
+      if (selectCategory.value == 14) {
+        otherCategory.style.display = "block";
+        otherCategory.focus();
+      } else {
+        otherCategory.style.display = "none";
+      }
+    });
+  }
 };
 
-// Add new category using the Category class
+// ADD NEW CATEGORY (INSERT NEW CATEGORY BEFORE "Other")
 const addNewCategory = () => {
   const newCatName = otherCategory.value.trim();
   if (newCatName !== "") {
-    // Check if it already exists in categoriesArray
-    if (
-      categoriesArray.find(
-        (cat) => cat.name.toLowerCase() === newCatName.toLowerCase()
-      )
-    ) {
+    // Check if the category already exists (case-insensitive)
+    const exists = categories.some(
+      (cat) => cat.name.trim().toLowerCase() === newCatName.toLowerCase()
+    );
+    if (exists) {
       message.innerHTML = `The category "${newCatName}" already exists!`;
       message.style.color = "red";
+      // Select the existing category
+      const existing = categories.find(
+        (cat) => cat.name.trim().toLowerCase() === newCatName.toLowerCase()
+      );
+      if (selectCategory) selectCategory.value = existing.value;
       return false;
     }
-    const newCat = new Category(newCatName, categoriesArray.length + 1);
-    categoriesArray.push(newCat);
-    // Add new category to the dropdown
-    const newOption = document.createElement("option");
-    newOption.value = newCat.value;
-    newOption.textContent = newCat.name;
-    selectCategory.appendChild(newOption);
-    selectCategory.value = newCat.value;
+    // Create new category object
+    const newCategoryObject = {
+      name: newCatName,
+      value: categories.length + 1,
+    };
+
+    // Insert new category before "Other", so that "Other" stays at the end.
+    const otherIndex = categories.findIndex(
+      (cat) => cat.name.trim().toLowerCase() === "other"
+    );
+    if (otherIndex !== -1) {
+      categories.splice(otherIndex, 0, newCategoryObject);
+    } else {
+      categories.push(newCategoryObject);
+    }
+
+    // Save updated categories to localStorage
+    localStorage.setItem("categories", JSON.stringify(categories));
+    updateCategorySelect();
+
+    // Immediately select the new category
+    if (selectCategory) selectCategory.value = newCategoryObject.value;
+
+    // Reset input field and hide it
     otherCategory.value = "";
     otherCategory.style.display = "none";
+
     message.innerHTML = `Category "${newCatName}" added successfully!`;
     message.style.color = "green";
-    updateCategorySelect();
-    return newCat;
+
+    return newCatName;
   }
   return null;
 };
 
-// Add a new question from the form using the Question class
+// ADD QUESTION FROM THE FORM (PREVENT DUPLICATES IN SELECTED CATEGORY)
+
 const addQuestion = async (event) => {
   event.preventDefault();
+
+  // Reload quizQuestions from localStorage to include previously added questions.
+  quizQuestions = JSON.parse(localStorage.getItem("quizQuestions")) || [];
 
   const questionInput = document.getElementById("question");
   const questionText = questionInput.value.trim();
 
-  // Determine the selected category as a Category instance
-  let selectedCategoryInstance = null;
+  // Determine the selected category as a string.
+  let selectedCategory = "";
   if (selectCategory.value == 14) {
-    const newCat = addNewCategory();
+    const newCat = addNewCategory(); // if "Other" is selected, try to add a new category
     if (!newCat) return;
-    selectedCategoryInstance = newCat;
+    selectedCategory = newCat;
   } else {
-    const selectedVal = parseInt(selectCategory.value);
-    selectedCategoryInstance = categoriesArray.find(
-      (cat) => cat.value === selectedVal
-    );
+    selectedCategory =
+      selectCategory.options[selectCategory.selectedIndex].textContent.trim();
   }
 
-  if (
-    !selectedCategoryInstance ||
-    selectedCategoryInstance.name === "Select a category"
-  ) {
+  if (!selectedCategory || selectedCategory === "Select a category") {
     message.innerHTML = "Please select a valid category.";
     message.style.color = "red";
     return;
   }
 
+  // Duplicate check: compare question text exactly (after trimming)
+  const duplicateFound = quizQuestions.some((q) => {
+    let storedCat = "";
+    if (q.category && typeof q.category === "object" && q.category.name) {
+      storedCat = q.category.name.trim();
+    } else if (typeof q.category === "string") {
+      storedCat = q.category.trim();
+    }
+    return storedCat === selectedCategory && q.question.trim() === questionText;
+  });
+
+  if (duplicateFound) {
+    message.innerHTML = `This question already exists in the "${selectedCategory}" category.`;
+    message.style.color = "red";
+    return;
+  }
+
+  // Gather answer options.
   const optionsText = Array.from(
     document.querySelectorAll(".option-input")
   ).map((input) => input.value.trim());
@@ -292,22 +298,15 @@ const addQuestion = async (event) => {
     return;
   }
 
-  // Check if the question already exists in the selected category
-  const exists = quizQuestions.some(
-    (q) =>
-      q.category.toLowerCase() ===
-        selectedCategoryInstance.name.toLowerCase() &&
-      q.question.toLowerCase() === questionText.toLowerCase()
-  );
-  if (exists) {
-    message.innerHTML = `This question already exists in the "${selectedCategoryInstance.name}" category.`;
-    message.style.color = "red";
-    return;
-  }
+  // Create new question object.
+  const newQuestion = {
+    category: selectedCategory,
+    question: questionText,
+    options,
+    explanation: "",
+  };
 
-  // Create a new Question instance
-  const newQ = new Question(selectedCategoryInstance, questionText, options);
-  await postQuestion(newQ);
+  await postQuestion(newQuestion);
 
   console.log("Updated Questions Array:", quizQuestions);
 
@@ -318,20 +317,37 @@ const addQuestion = async (event) => {
   displayQuizCards();
 };
 
-// Display quiz cards based on categories and questions
+// DISPLAY QUIZ CARDS
 const displayQuizCards = () => {
-  if (!quizListContainer || !questionList) return;
-  quizListContainer.innerHTML = "";
-
-  // Use all categories except "Other"
-  const allCats = categoriesArray.filter(
-    (cat) => cat.name.toLowerCase() !== "other"
+  // If the containers don't exist on this page, exit.
+  if (!quizListContainer || !questionList) {
+    console.warn("One or more container elements are missing.");
+    return;
+  }
+  console.log(
+    "quizListContainer:",
+    quizListContainer,
+    "questionList:",
+    questionList
   );
-  allCats.forEach((cat) => {
-    const category = cat.name;
-    const questionsForCard = quizQuestions.filter(
-      (q) => q.category.toLowerCase() === category.toLowerCase()
-    );
+  // Hide the start quiz container if we're in list view.
+  if (startQuizContainer) startQuizContainer.style.display = "none";
+
+  quizListContainer.innerHTML = "";
+  // Use all categories except "Other"
+  const allCategories = categories.filter(
+    (cat) => cat.name.trim().toLowerCase() !== "other"
+  );
+  allCategories.forEach((categoryObj) => {
+    const category = categoryObj.name;
+    const questionsForCard = quizQuestions.filter((q) => {
+      const qCategory =
+        typeof q.category === "string"
+          ? q.category.trim()
+          : q.category.name.trim();
+      return qCategory === category;
+    });
+
     const card = document.createElement("div");
     card.className = "quiz-card";
     card.innerHTML = `
@@ -348,45 +364,52 @@ const displayQuizCards = () => {
   });
 };
 
-// Filter categories based on search term and update UI
+// FILTER CATEGORIES FOR SEARCH
 const filterCategories = (searchTerm = "") => {
   quizListContainer.innerHTML = "";
-  const filteredCats = categoriesArray.filter(
+  const filteredCategories = categories.filter(
     (cat) =>
       cat.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      cat.name.toLowerCase() !== "other"
+      cat.name.trim().toLowerCase() !== "other"
   );
-  filteredCats.forEach((cat) => {
-    const questionsInCat = quizQuestions.filter(
-      (q) => q.category.toLowerCase() === cat.name.toLowerCase()
-    );
+
+  filteredCategories.forEach((category) => {
+    const questionsInCategory = quizQuestions.filter((q) => {
+      const qCategory =
+        typeof q.category === "string"
+          ? q.category.trim()
+          : q.category.name.trim();
+      return qCategory.toLowerCase() === category.name.toLowerCase();
+    });
+
     const card = document.createElement("div");
     card.className = "quiz-card";
     card.innerHTML = `
-      <h3>${cat.name}</h3>
-      <p>${questionsInCat.length} question(s)</p>
+      <h3>${category.name}</h3>
+      <p>${questionsInCategory.length} question(s)</p>
       <div class="btn-group">
         <button class="play-btn" ${
-          questionsInCat.length === 0 ? "disabled" : ""
+          questionsInCategory.length === 0 ? "disabled" : ""
         }>Play</button>
       </div>
     `;
     card.querySelector(".play-btn").addEventListener("click", () => {
-      showQuestionsForCategory(cat.name);
+      showQuestionsForCategory(category.name);
     });
     quizListContainer.appendChild(card);
   });
 };
 
-// Show questions for a specific category
-function showQuestionsForCategory(categoryName) {
-  const qList = document.getElementById("question-list");
-  const qContainer = document.getElementById("quiz-list");
-
-  qContainer.style.display = "none";
-  qList.style.display = "block";
-  qList.innerHTML = "";
-  searchInput.placeholder = "Search by question ...";
+// SHOW QUESTIONS FOR A SPECIFIC CATEGORY (List View)
+const showQuestionsForCategory = (categoryName) => {
+  // Hide list containers and show the questions container.
+  if (startQuizContainer) startQuizContainer.style.display = "none";
+  if (quizListContainer) quizListContainer.style.display = "none";
+  if (questionList) {
+    questionList.style.display = "block";
+    questionList.innerHTML = "";
+  }
+  if (searchInput) searchInput.placeholder = "Search by question ...";
 
   const newSearchInput = searchInput.cloneNode(true);
   searchInput.parentNode.replaceChild(newSearchInput, searchInput);
@@ -395,14 +418,18 @@ function showQuestionsForCategory(categoryName) {
     filterQuestionsByText(searchTerm, categoryName);
   });
 
-  const questions = quizQuestions.filter(
-    (q) => q.category.toLowerCase() === categoryName.toLowerCase()
-  );
+  const questions = quizQuestions.filter((q) => {
+    const qCategory =
+      typeof q.category === "string"
+        ? q.category.trim()
+        : q.category.name.trim();
+    return qCategory.toLowerCase() === categoryName.trim().toLowerCase();
+  });
 
   const header = document.createElement("div");
   header.className = "headerQuestions";
   header.innerHTML = `<h3>${categoryName}</h3><p>${questions.length} question(s)</p>`;
-  qList.appendChild(header);
+  questionList.appendChild(header);
 
   questions.forEach((q, index) => {
     const card = document.createElement("div");
@@ -420,45 +447,53 @@ function showQuestionsForCategory(categoryName) {
     deleteBtn.addEventListener("click", () => {
       deleteQuestionFromCategory(q.question, categoryName);
     });
-    qList.appendChild(card);
+    questionList.appendChild(card);
   });
-
   const playButton = document.createElement("div");
   playButton.className = "btn-group";
   playButton.innerHTML = `<button class="play-quiz" ${
     questions.length === 0 ? "disabled" : ""
   }>Play Quiz</button>`;
-  qList.appendChild(playButton);
-}
+  playButton.querySelector(".play-quiz").addEventListener("click", () => {
+    // Instead of directly starting the quiz, prompt for player setup.
+    initMultiplayerQuiz(categoryName, questions);
+  });
+  questionList.appendChild(playButton);
+};
 
-// Filter questions by text within a category
-function filterQuestionsByText(searchText, categoryName) {
+// FILTER QUESTIONS BY TEXT WITHIN A CATEGORY (List View Filtering)
+
+const filterQuestionsByText = (searchText, categoryName) => {
   questionList.innerHTML = "";
-  const questionsInCat = quizQuestions.filter(
-    (q) => q.category.toLowerCase() === categoryName.toLowerCase()
-  );
+  const questionsInCategory = quizQuestions.filter((q) => {
+    const qCategory =
+      typeof q.category === "string"
+        ? q.category.trim()
+        : q.category.name.trim();
+    return qCategory.toLowerCase() === categoryName.trim().toLowerCase();
+  });
   const filteredQuestions = searchText
-    ? questionsInCat.filter((q) =>
-        q.question.toLowerCase().includes(searchText.toLowerCase())
+    ? questionsInCategory.filter((q) =>
+        q.question
+          .trim()
+          .toLowerCase()
+          .includes(searchText.trim().toLowerCase())
       )
-    : questionsInCat;
-
+    : questionsInCategory;
   if (filteredQuestions.length === 0) {
     questionList.innerHTML = `
       <div class="headerQuestions">
         <h3>${categoryName}</h3>
-        <p>${questionsInCat.length} total question(s)</p>
+        <p>${questionsInCategory.length} total question(s)</p>
       </div>
       <p style="color: gray;">No questions match your search.</p>
     `;
     return;
   }
-
   const header = document.createElement("div");
   header.className = "headerQuestions";
   header.innerHTML = `<h3>${categoryName}</h3><p>${filteredQuestions.length} question(s)</p>`;
   questionList.appendChild(header);
-
   filteredQuestions.forEach((q, index) => {
     const questionCard = document.createElement("div");
     questionCard.className = "question-card";
@@ -466,7 +501,7 @@ function filterQuestionsByText(searchText, categoryName) {
       <p><strong>Q${index + 1}:</strong> ${q.question}</p>
       <ul class="option-list">
         ${q.options
-          .map((opt) => `<li class="answer-option">${opt.text}</li>`)
+          .map((opt) => `<li class="answer-answer">${opt.text}</li>`)
           .join("")}
       </ul>
       <button class="delete-btn">Delete Question</button>
@@ -477,33 +512,36 @@ function filterQuestionsByText(searchText, categoryName) {
     });
     questionList.appendChild(questionCard);
   });
-
   const playButton = document.createElement("div");
   playButton.className = "btn-group";
   playButton.innerHTML = `<button class="play-quiz" ${
     filteredQuestions.length === 0 ? "disabled" : ""
   }>Play Quiz</button>`;
   questionList.appendChild(playButton);
-}
+};
 
-// Delete a question from a category
+// DELETE A QUESTION
+
 const deleteQuestionFromCategory = (questionText, categoryName) => {
   let localQuestions = JSON.parse(localStorage.getItem("quizQuestions")) || [];
+
   localQuestions = localQuestions.filter(
     (q) =>
       !(
-        q.category.toLowerCase() === categoryName.toLowerCase() &&
-        q.question.toLowerCase() === questionText.toLowerCase()
+        q.category.trim().toLowerCase() === categoryName.trim().toLowerCase() &&
+        q.question.trim().toLowerCase() === questionText.trim().toLowerCase()
       )
   );
+
   localStorage.setItem("quizQuestions", JSON.stringify(localQuestions));
   quizQuestions = quizQuestions.filter(
     (q) =>
       !(
-        q.category.toLowerCase() === categoryName.toLowerCase() &&
-        q.question.toLowerCase() === questionText.toLowerCase()
+        q.category.trim().toLowerCase() === categoryName.trim().toLowerCase() &&
+        q.question.trim().toLowerCase() === questionText.trim().toLowerCase()
       )
   );
+
   filterQuestionsByText(searchInput.value, categoryName);
 };
 
@@ -512,7 +550,201 @@ const searchQuizzes = () => {
   filterCategories(query);
 };
 
-// Event Listeners
+// MULTIPLAYER QUIZ MODE: PLAYER SETUP & START QUIZ
+
+const initMultiplayerQuiz = (categoryName, questions) => {
+  // Hide the global search and question list container.
+  document.querySelector(".search").style.display = "none";
+  if (questionList) questionList.style.display = "none";
+
+  // Clear and show the start quiz container.
+  startQuizContainer.innerHTML = "";
+  startQuizContainer.style.display = "block";
+
+  // Display a player setup form.
+  startQuizContainer.innerHTML = `
+    <div id="playerSetup">
+      <h2>Enter Player Names</h2>
+      <label for="player1">Player 1:</label>
+      <input type="text" id="player1" placeholder="Player 1 Name" />
+      <br>
+      <label for="player2">Player 2:</label>
+      <input type="text" id="player2" placeholder="Player 2 Name" />
+      <br>
+      <button id="startGameBtn">Start Quiz</button>
+    </div>
+  `;
+  document.getElementById("startGameBtn").addEventListener("click", () => {
+    const player1Name =
+      document.getElementById("player1").value.trim() || "Player 1";
+    const player2Name =
+      document.getElementById("player2").value.trim() || "Player 2";
+    const players = {
+      player1: { name: player1Name, score: 0 },
+      player2: { name: player2Name, score: 0 },
+    };
+    startQuizForCategoryWithPlayers(categoryName, questions, players);
+  });
+};
+
+// START QUIZ WITH PLAYERS (Interactive Quiz Mode with Multiplayer Scoring)
+const startQuizForCategoryWithPlayers = (categoryName, questions, players) => {
+  // Hide other elements.
+  document.querySelector(".search").style.display = "none";
+  if (questionList) questionList.style.display = "none";
+
+  startQuizContainer.style.display = "block";
+  startQuizContainer.innerHTML = "";
+
+  // Create scoreboard container.
+  const scoreboard = document.createElement("div");
+  scoreboard.className = "scoreboard";
+  scoreboard.innerHTML = `
+    <div id="player1Score">
+      ${players.player1.name}: <span id="score1">${players.player1.score}</span>
+      <button class="correct" id="p1Correct">Correct</button>
+      <button class="wrong" id="p1Wrong">Wrong</button>
+    </div>
+    <div id="player2Score">
+      ${players.player2.name}: <span id="score2">${players.player2.score}</span>
+      <button class="correct" id="p2Correct">Correct</button>
+      <button class="wrong" id="p2Wrong">Wrong</button>
+    </div>
+  `;
+  startQuizContainer.appendChild(scoreboard);
+
+  const updateScoreboard = () => {
+    document.getElementById("score1").textContent = players.player1.score;
+    document.getElementById("score2").textContent = players.player2.score;
+  };
+
+  // Randomize questions.
+  const randomizedQuestions = [...questions].sort(() => Math.random() - 0.5);
+  let currentIndex = 0;
+  const total = randomizedQuestions.length;
+
+  const showQuestion = () => {
+    // Keep the scoreboard in place; remove other content below.
+    while (startQuizContainer.childNodes.length > 1) {
+      startQuizContainer.removeChild(startQuizContainer.lastChild);
+    }
+
+    if (currentIndex >= total) {
+      startQuizContainer.innerHTML += `
+        <p>Quiz Completed!</p>
+        <button id="backToQuestionsBtn">Back to Questions</button>
+      `;
+      document
+        .getElementById("backToQuestionsBtn")
+        .addEventListener("click", () => {
+          startQuizContainer.style.display = "none";
+          if (questionList) questionList.style.display = "block";
+        });
+      return;
+    }
+
+    const currentQuestion = randomizedQuestions[currentIndex];
+    const qElem = document.createElement("div");
+    qElem.className = "quiz-question";
+    qElem.innerHTML = `<p><strong>Question ${
+      currentIndex + 1
+    } of ${total}:</strong> ${currentQuestion.question}</p>`;
+    startQuizContainer.appendChild(qElem);
+
+    // Randomize options.
+    const options = [...currentQuestion.options].sort(
+      () => Math.random() - 0.5
+    );
+    const optionsContainer = document.createElement("div");
+    optionsContainer.className = "options-container";
+
+    options.forEach((option) => {
+      const btn = document.createElement("button");
+      btn.className = "option-btn";
+      btn.textContent = option.text;
+      btn.addEventListener("click", () => {
+        const allBtns = optionsContainer.querySelectorAll("button");
+        allBtns.forEach((b) => (b.disabled = true));
+        if (option.isCorrect) {
+          btn.style.backgroundColor = "green";
+        } else {
+          btn.style.backgroundColor = "red";
+          allBtns.forEach((b) => {
+            if (
+              b.textContent ===
+              currentQuestion.options.find((o) => o.isCorrect).text
+            ) {
+              b.style.backgroundColor = "green";
+            }
+          });
+        }
+        if (currentQuestion.explanation) {
+          const expl = document.createElement("p");
+          expl.className = "explanation";
+          expl.textContent = currentQuestion.explanation;
+          startQuizContainer.appendChild(expl);
+        }
+
+        // Attach scoring listeners.
+        document.getElementById("p1Correct").onclick = () => {
+          players.player1.score += 1;
+          updateScoreboard();
+          checkForWinner();
+        };
+        document.getElementById("p1Wrong").onclick = () => {
+          players.player2.score += 1;
+          updateScoreboard();
+          checkForWinner();
+        };
+        document.getElementById("p2Correct").onclick = () => {
+          players.player2.score += 1;
+          updateScoreboard();
+          checkForWinner();
+        };
+        document.getElementById("p2Wrong").onclick = () => {
+          players.player1.score += 1;
+          updateScoreboard();
+          checkForWinner();
+        };
+
+        const nextBtn = document.createElement("button");
+        nextBtn.className = "next-btn";
+        nextBtn.textContent = "Next Question";
+        nextBtn.addEventListener("click", () => {
+          currentIndex++;
+          showQuestion();
+        });
+        startQuizContainer.appendChild(nextBtn);
+      });
+      optionsContainer.appendChild(btn);
+    });
+    startQuizContainer.appendChild(optionsContainer);
+  };
+
+  const checkForWinner = () => {
+    if (players.player1.score >= 10 || players.player2.score >= 10) {
+      startQuizContainer.innerHTML = `
+        <p>Game Over! ${
+          players.player1.score >= 10
+            ? players.player1.name
+            : players.player2.name
+        } wins!</p>
+        <button id="backToQuestionsBtn">Back to Questions</button>
+      `;
+      document
+        .getElementById("backToQuestionsBtn")
+        .addEventListener("click", () => {
+          startQuizContainer.style.display = "none";
+          if (questionList) questionList.style.display = "block";
+        });
+    }
+  };
+
+  showQuestion();
+};
+
+// EVENT LISTENERS
+
 window.addEventListener("DOMContentLoaded", () => {
   if (form && selectCategory) {
     selectcategories(); // Only run if we're on the create page
@@ -529,8 +761,9 @@ window.addEventListener("DOMContentLoaded", () => {
   if (searchInput) {
     searchInput.addEventListener("input", searchQuizzes);
   }
-});
-
-close.addEventListener("click", () => {
-  window.location.href = "./index.html";
+  if (close) {
+    close.addEventListener("click", () => {
+      window.location.href = "./index.html";
+    });
+  }
 });
