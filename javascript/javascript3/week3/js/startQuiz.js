@@ -1,7 +1,5 @@
 // startQuiz.js
 
-// (Assuming API_URL, quizQuestions, apiQuestions, and categories are already declared in a shared scope
-//   or you can duplicate the declarations from createQuiz.js if needed.)
 const API_URL =
   "https://raw.githubusercontent.com/Hajar-El-Mhassani/Hajar-El-Mhassani.github.io/main/quizData/quiz/questionQuiz.json";
 
@@ -86,7 +84,6 @@ const updateCategorySelect = () => {
   const savedCategories =
     JSON.parse(localStorage.getItem("categories")) || categories;
   if (!savedCategories) return;
-  // (You can use this if you have a select in startQuiz.html for filtering.)
 };
 
 // ---------- DISPLAY QUIZ CARDS (List of Categories) -----------
@@ -173,7 +170,7 @@ const showQuestionsForCategory = (categoryName) => {
     questionList.appendChild(card);
   });
 
-  // Append a Play Quiz button that starts multiplayer mode.
+  // Append a Play Quiz button that starts players
   const playButtonContainer = document.createElement("div");
   playButtonContainer.className = "btn-group";
   const playQuizBtn = document.createElement("button");

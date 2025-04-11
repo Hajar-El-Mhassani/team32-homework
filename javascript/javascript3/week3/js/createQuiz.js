@@ -1,9 +1,10 @@
 // createQuiz.js
 
-// Replaced localStorage with a fetch to get data from API
+// API URL
 const API_URL =
   "https://raw.githubusercontent.com/Hajar-El-Mhassani/Hajar-El-Mhassani.github.io/main/quizData/quiz/questionQuiz.json";
 
+//
 let quizQuestions = [];
 let apiQuestions = [];
 
@@ -32,7 +33,7 @@ let categories = JSON.parse(localStorage.getItem("categories")) || [
   { name: "Other", value: 14 },
 ];
 
-// ---------- FETCH QUESTIONS & MERGE API CATEGORIES -----------
+//FETCH QUESTIONS & MERGE API CATEGORIES
 const fetchQuestions = async () => {
   try {
     const res = await fetch(API_URL);
@@ -103,52 +104,11 @@ const updateCategorySelect = () => {
   }
 };
 
-// ---------- POST A NEW QUESTION (SAVE TO localStorage) -----------
-const postQuestion = async (newQuestion) => {
-  const localQuestions =
-    JSON.parse(localStorage.getItem("quizQuestions")) || [];
-  localQuestions.push(newQuestion);
-  localStorage.setItem("quizQuestions", JSON.stringify(localQuestions));
-  // Merge API and local questions.
-  quizQuestions = [...apiQuestions, ...localQuestions];
-  localStorage.setItem("quizQuestions", JSON.stringify(quizQuestions));
-
-  // If the new question's category is not in our categories array, add it.
-  const exists = categories.find(
-    (cat) =>
-      cat.name.trim().toLowerCase() ===
-      newQuestion.category.trim().toLowerCase()
-  );
-  if (!exists) {
-    categories.push({
-      name: newQuestion.category,
-      value: categories.length + 1,
-    });
-    localStorage.setItem("categories", JSON.stringify(categories));
-    updateCategorySelect();
-  }
-};
-
-// ---------- SELECT CATEGORIES (HANDLE "OTHER" OPTION) -----------
-const selectcategories = () => {
-  updateCategorySelect();
-  if (selectCategory) {
-    selectCategory.addEventListener("change", () => {
-      if (selectCategory.value == 14) {
-        otherCategory.style.display = "block";
-        otherCategory.focus();
-      } else {
-        otherCategory.style.display = "none";
-      }
-    });
-  }
-};
-
 // ---------- ADD NEW CATEGORY (INSERT BEFORE "Other") -----------
 const addNewCategory = () => {
   const newCatName = otherCategory.value.trim();
   if (newCatName !== "") {
-    // Check if the category already exists (case-insensitive).
+    // Check if the category already exists.
     const exists = categories.some(
       (cat) => cat.name.trim().toLowerCase() === newCatName.toLowerCase()
     );
@@ -268,7 +228,46 @@ const addQuestion = async (event) => {
   otherCategory.style.display = "none";
   message.innerHTML = "Question Added Successfully!";
   message.style.color = "green";
-  // Optionally, refresh list view on the create page (if needed)
+};
+// ---------- POST A NEW QUESTION (SAVE TO localStorage) -----------
+const postQuestion = async (newQuestion) => {
+  const localQuestions =
+    JSON.parse(localStorage.getItem("quizQuestions")) || [];
+  localQuestions.push(newQuestion);
+  localStorage.setItem("quizQuestions", JSON.stringify(localQuestions));
+  // Merge API and local questions.
+  quizQuestions = [...apiQuestions, ...localQuestions];
+  localStorage.setItem("quizQuestions", JSON.stringify(quizQuestions));
+
+  // If the new question's category is not in  categories array, add it.
+  const exists = categories.find(
+    (cat) =>
+      cat.name.trim().toLowerCase() ===
+      newQuestion.category.trim().toLowerCase()
+  );
+  if (!exists) {
+    categories.push({
+      name: newQuestion.category,
+      value: categories.length + 1,
+    });
+    localStorage.setItem("categories", JSON.stringify(categories));
+    updateCategorySelect();
+  }
+};
+
+// ---------- SELECT CATEGORIES (HANDLE "OTHER" OPTION) -----------
+const selectcategories = () => {
+  updateCategorySelect();
+  if (selectCategory) {
+    selectCategory.addEventListener("change", () => {
+      if (selectCategory.value == 14) {
+        otherCategory.style.display = "block";
+        otherCategory.focus();
+      } else {
+        otherCategory.style.display = "none";
+      }
+    });
+  }
 };
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -281,6 +280,6 @@ window.addEventListener("DOMContentLoaded", () => {
     selectcategories();
     form.addEventListener("submit", addQuestion);
   }
-  // You may call fetchQuestions() on the create quiz page if needed.
+
   fetchQuestions();
 });

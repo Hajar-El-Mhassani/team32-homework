@@ -32,7 +32,7 @@ let categories = JSON.parse(localStorage.getItem("categories")) || [
   { name: "Other", value: 14 },
 ];
 
-// ---------- FETCH QUESTIONS & MERGE API CATEGORIES -----------
+// FETCH QUESTIONS & MERGE API CATEGORIES
 const fetchQuestions = async () => {
   try {
     const res = await fetch(API_URL);
