@@ -13,5 +13,6 @@ UPDATE task SET due_date= CURRENT_TIMESTAMP WHERE id = 40;
 --4. Change a task status
 UPDATE task SET status_id=(SELECT id FROM status WHERE name='In Progress') WHERE id=37;
 --4. Mark a task as complete
-UPDATE task SET status_id=(SELECT id FROM status WHERE name='Done') WHERE id=37;
+UPDATE task SET status_id=(SELECT id FROM status WHERE name='Done') WHERE id=40;
 --4. Delete a task
+DELETE FROM task WHERE title='Wash the car';
