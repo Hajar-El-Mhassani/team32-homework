@@ -1,5 +1,5 @@
--- Active: 1744803590139@@127.0.0.1@3307@continuing_education
--- continuing_education_schema.sql
+-- Active: 1746434894922@@127.0.0.1@3307@continuing_education_schema
+
 
 CREATE TABLE student (
     student_id INT AUTO_INCREMENT PRIMARY KEY,
