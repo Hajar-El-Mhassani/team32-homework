@@ -32,7 +32,7 @@
  );
 
  -- Create table Review
- CREATE TABLE reaview(
+ CREATE TABLE review(
     id INT AUTO_INCREMENT,
     title varchar(255) NOT NULL,
     description VARCHAR(255) NOT NULL,
