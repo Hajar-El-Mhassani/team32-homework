@@ -6,10 +6,10 @@ USE social_media;
 -- Users table
 CREATE TABLE users (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(255)  NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
-    registration_datetime DATETIME NOT NULL
+    registration_datetime DEFAULT CURRENT_TIMESTAMP NOT NULL
 );
 
 -- Posts table
@@ -17,8 +17,8 @@ CREATE TABLE posts (
     id INT PRIMARY KEY AUTO_INCREMENT,
     title TEXT,
     content TEXT NOT NULL,
-    created_date DATETIME NOT NULL,
-    updated_date DATETIME,
+    created_date  ⁠DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    updated_date  ⁠DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
     user_id INT NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
 );
@@ -26,9 +26,9 @@ CREATE TABLE posts (
 -- Comments table
 CREATE TABLE comments (
     id INT PRIMARY KEY AUTO_INCREMENT,
-    content TEXT,
-    created_date DATETIME NOT NULL,
-    updated_date DATETIME,
+    content TEXT NOT NULL,
+    created_date  ⁠DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+    updated_date  ⁠DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
     user_id INT NOT NULL,
     post_id INT NOT NULL,
     parent_comment_id INT,
