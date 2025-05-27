@@ -1,0 +1,37 @@
+[
+  {
+    "id": 1,
+    "name": "Used Apple Airpods",
+    "price": "50",
+    "description": "Battery life is not great"
+  },
+  {
+    "id": 2,
+    "type": "doc",
+    "value": "hello world"
+  },
+  {
+    "id": 3,
+    "name": "Iphone 12",
+    "value": "1000",
+    "description": "Battery life is not great"
+  },
+  {
+    "id": 4,
+    "name": "Used Macbook Pro",
+    "price": "1500",
+    "description": "Battery life is not great"
+  },
+  {
+    "id": 5,
+    "name": "Used Dell Laptop",
+    "price": "800",
+    "description": "Battery life is not great"
+  },
+  {
+    "id": 6,
+    "name": "Used Samsung Galaxy S21",
+    "price": "700",
+    "description": "Battery life is not great"
+  }
+]
