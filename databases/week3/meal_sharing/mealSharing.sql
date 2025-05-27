@@ -1,4 +1,4 @@
--- Active: 1746434894922@@127.0.0.1@3307@mealSharing_schema
+-- Active: 1746528944152@@127.0.0.1@3307@mealSharing_schema
  
 
  --Create Meal table
