@@ -1,9 +1,11 @@
 import "dotenv/config";
 import express from "express";
 import fs from "fs";
+import morgan from "morgan";
 import { StatusCodes } from "http-status-codes";
 
 const app = express();
+app.use(morgan("dev"));
 const port = process.env.PORT || 3000;
 
 // Support parsing JSON requests
