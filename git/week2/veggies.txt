@@ -3,3 +3,5 @@
 3. Potato
 4. Onion
 5. Cabbage
+6. Spinach
+7. Lettuce
